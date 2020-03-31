@@ -396,10 +396,12 @@ const boardElement = siteMainElement.querySelector(`.board`);
 // Отрис Карточку создания/ред задачи
 render(taskListElement, createTaskEditTemplate(), `beforeend`);
 
+// Отрис Карточки задачи
 for (let i = 0; i < TASK_COUNT; i++) {
   render(taskListElement, createTaskTemplate(), `beforeend`);
 }
 
+// Отрис кнопки 'Load more'
 render(boardElement, createLoadMoreButtonTemplate(), `beforeend`);
 
 
