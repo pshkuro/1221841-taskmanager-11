@@ -1,9 +1,8 @@
 'use strict';
 
+const TASK_COUNT = 3;
 const siteMainElement = document.querySelector(`.main`);
 const siteHeaderElement = siteMainElement.querySelector(`.main__control`);
-const taskListElement = siteMainElement.querySelector(`.board__tasks`);
-const boardElement = siteMainElement.querySelector(`.board`);
 
 
 // Ф генерации меню
@@ -106,7 +105,7 @@ const createFilterTemplate = () => {
   );
 };
 
-// Ф генерации блока сортировки 
+// Ф генерации блока сортировки
 const createBoardTemplate = () => {
   return (
     `<section class="board container">
@@ -148,7 +147,7 @@ const createTaskTemplate = () => {
         </div>
 
         <div class="card__textarea-wrap">
-          <p class="card__text">Example default task with default color.</p>
+          <p class="card__text">Example task with default color.</p>
         </div>
 
         <div class="card__settings">
@@ -385,4 +384,22 @@ const render = (container, template, place) => {
   container.insertAdjacentHTML(place, template);
 };
 
+
+// Отрисовываем Меню, Фильтры, Сортировку
 render(siteHeaderElement, createSiteMenuTemplate(), `beforeend`);
+render(siteMainElement, createFilterTemplate(), `beforeend`);
+render(siteMainElement, createBoardTemplate(), `beforeend`);
+
+const taskListElement = siteMainElement.querySelector(`.board__tasks`);
+const boardElement = siteMainElement.querySelector(`.board`);
+
+// Отрис Карточку создания/ред задачи
+render(taskListElement, createTaskEditTemplate(), `beforeend`);
+
+for (let i = 0; i < TASK_COUNT; i++) {
+  render(taskListElement, createTaskTemplate(), `beforeend`);
+}
+
+render(boardElement, createLoadMoreButtonTemplate(), `beforeend`);
+
+
