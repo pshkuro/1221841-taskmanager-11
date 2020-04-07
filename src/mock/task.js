@@ -1,5 +1,12 @@
 const generateTask = () => {
-  return {};
+  return {
+    description: `Согласовать макет визиток и бейджей`,
+    dueDate: Math.random() > 0.5 ? new Date() : null,
+    repeatingDays: null,
+    color: `pink`,
+    isArchive: Math.random() > 0.5,
+    isFavorite: Math.random() > 0.5,
+  };
 };
 
 const generateTasks = (count) => {
