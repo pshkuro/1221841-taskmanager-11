@@ -8,7 +8,9 @@ import {createLoadMoreButtonTemplate} from "./components/load-more-button";
 import {generateFilters} from "./mock/filter";
 import {generateTasks} from "./mock/task";
 
-const TASK_COUNT = 3;
+const TASK_COUNT = 22;
+const SHOWING_TASKS_COUNT_ON_START = 8;
+const SHOWING_TASKS_COUNT_BY_BUTTON = 8;
 const siteMainElement = document.querySelector(`.main`);
 const siteHeaderElement = siteMainElement.querySelector(`.main__control`);
 
@@ -31,10 +33,26 @@ const boardElement = siteMainElement.querySelector(`.board`);
 render(boardElement, createSortingTemplate(), `afterbegin`);
 render(taskListElement, createTaskEditTemplate(tasks[0]), `beforeend`);
 
-for (let i = 0; i < tasks.length; i++) {
-  render(taskListElement, createTaskTemplate(tasks[i]), `beforeend`);
-}
+let showingTasksCount = SHOWING_TASKS_COUNT_ON_START;
+
+// Отрсиовка эл-ов разметки на страницу
+tasks.slice(1, showingTasksCount).forEach((i) => render(taskListElement, createTaskTemplate(i), `beforeend`));
 
 render(boardElement, createLoadMoreButtonTemplate(), `beforeend`);
+
+const loadMoreButton = boardElement.querySelector(`.load-more`);
+
+// Загружаем карточки дополинтельно по клике на кнопку load-more
+loadMoreButton.addEventListener(`click`, function clickButtonMore() {
+  const prevTasksCount = showingTasksCount;
+  showingTasksCount = showingTasksCount + SHOWING_TASKS_COUNT_BY_BUTTON;
+
+  tasks.slice(prevTasksCount, showingTasksCount)
+  .forEach((task) => render(taskListElement, createTaskTemplate(task), `beforeend`));
+
+  if (showingTasksCount > tasks.length) {
+    loadMoreButton.remove();
+  }
+});
 
 

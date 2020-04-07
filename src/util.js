@@ -22,7 +22,7 @@ export const getRandomIntegerNumber = (min, max) => {
   return min + Math.floor(Math.random() * (max - min));
 };
 
-// Генерация случайной даты
+// Генерация случайной даты (+/- 7 дней с DateNow)
 export const getRandomDate = () => {
   const targetDate = new Date();
   const sign = Math.random() > 0.5 ? 1 : -1;
