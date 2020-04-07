@@ -1,71 +1,23 @@
-import {DAYS, MONTH_NAMES} from "../const";
+import {DAYS, COLORS, MONTH_NAMES} from "../const";
 import {formatTime} from "../util";
 
 // Генерация блока выбора цвета
-const createColorsMarkup = () => {
-  return (
-    `<input
+const createColorsMarkup = (colors, currentColor) => {
+  return colors.map((it, index) => {
+    return (`<input
     type="radio"
-    id="color-black-4"
-    class="card__color-input card__color-input--black visually-hidden"
+    id="color-${it}-${index}"
+    class="card__color-input card__color-input--${it} visually-hidden"
     name="color"
-    value="black"
+    value="${it}"
+    ${currentColor === it ? `checked` : ``}
   />
   <label
-    for="color-black-4"
-    class="card__color card__color--black"
-    >black</label
-  >
-  <input
-    type="radio"
-    id="color-yellow-4"
-    class="card__color-input card__color-input--yellow visually-hidden"
-    name="color"
-    value="yellow"
-    checked
-  />
-  <label
-    for="color-yellow-4"
-    class="card__color card__color--yellow"
-    >yellow</label
-  >
-  <input
-    type="radio"
-    id="color-blue-4"
-    class="card__color-input card__color-input--blue visually-hidden"
-    name="color"
-    value="blue"
-  />
-  <label
-    for="color-blue-4"
-    class="card__color card__color--blue"
-    >blue</label
-  >
-  <input
-    type="radio"
-    id="color-green-4"
-    class="card__color-input card__color-input--green visually-hidden"
-    name="color"
-    value="green"
-  />
-  <label
-    for="color-green-4"
-    class="card__color card__color--green"
-    >green</label
-  >
-  <input
-    type="radio"
-    id="color-pink-4"
-    class="card__color-input card__color-input--pink visually-hidden"
-    name="color"
-    value="pink"
-  />
-  <label
-    for="color-pink-4"
-    class="card__color card__color--pink"
-    >pink</label
-  >`
-  );
+    for="color-${it}-${index}"
+    class="card__color card__color--${it}"
+    >${it}</label
+  >`);
+  }).join(`\n`);
 };
 
 // Генерация блока выбора дня недели
@@ -107,7 +59,7 @@ export const createTaskEditTemplate = (task) => {
   const classRepeat = isRepeatingTask ? `card--repeat` : ``;
   const classDeadline = isExpired ? `card--deadline` : ``; // Если задача просрочена, доб класс deadline, иначе ничего
 
-  const colorsMarkup = createColorsMarkup();
+  const colorsMarkup = createColorsMarkup(COLORS, color);
   const repeatingDaysMarkup = createRepeatingDaysMarkup(DAYS, repeatingDays);
 
   return (
