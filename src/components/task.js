@@ -1,19 +1,33 @@
 // Ф генерации формы создания/редактирования задачи
-export const createTaskTemplate = () => {
+export const createTaskTemplate = (task) => {
+  const {} = task;
+
+  const color = `black`;
+  const description = `Согласовать макет визиток и бейджей`;
+  const date = `11 Febrary 2020`;
+  const time = `12:28`;
+  const isArchive = true;
+  const isFavorite = false;
+
+  const classRepeat = `card--repeat`;
+  const classDeadline = `card--deadline`;
+  const archiveButtonInativeClass = isArchive ? `` : `card__btn--disabled`;
+  const favoriteButtonInativeClass = isFavorite ? `` : `card__btn--disabled`;
+
   return (
-    `<article class="card card--black">
+    `<article class="card card--${color} ${classRepeat} ${classDeadline}">
     <div class="card__form">
       <div class="card__inner">
         <div class="card__control">
           <button type="button" class="card__btn card__btn--edit">
             edit
           </button>
-          <button type="button" class="card__btn card__btn--archive">
+          <button type="button" class="card__btn card__btn--archive ${archiveButtonInativeClass}">
             archive
           </button>
           <button
             type="button"
-            class="card__btn card__btn--favorites card__btn--disabled"
+            class="card__btn card__btn--favorites card__btn--disabled ${favoriteButtonInativeClass}"
           >
             favorites
           </button>
@@ -26,7 +40,7 @@ export const createTaskTemplate = () => {
         </div>
 
         <div class="card__textarea-wrap">
-          <p class="card__text">Example task with default color.</p>
+          <p class="card__text">${description}.</p>
         </div>
 
         <div class="card__settings">
@@ -34,8 +48,8 @@ export const createTaskTemplate = () => {
             <div class="card__dates">
               <div class="card__date-deadline">
                 <p class="card__input-deadline-wrap">
-                  <span class="card__date">23 September</span>
-                  <span class="card__time">16:15</span>
+                  <span class="card__date">${date}</span>
+                  <span class="card__time">${time}</span>
                 </p>
               </div>
             </div>

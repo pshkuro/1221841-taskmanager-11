@@ -1,7 +1,17 @@
 // Ф генерации карточки задачи
-export const createTaskEditTemplate = () => {
+export const createTaskEditTemplate = (task) => {
+  const {} = task;
+
+  const color = `yellow`;
+  const description = `Согласовать макет визиток и бейджей`;
+  const date = `11 Febrary 2020`;
+  const time = `12:28`;
+
+  const classRepeat = `card--repeat`;
+  const classDeadline = `card--deadline`;
+
   return (
-    `<article class="card card--edit card--yellow card--repeat">
+    `<article class="card card--edit card--${color} ${classRepeat} ${classDeadline}">
       <form class="card__form" method="get">
         <div class="card__inner">
           <div class="card__color-bar">
@@ -16,7 +26,7 @@ export const createTaskEditTemplate = () => {
                 class="card__text"
                 placeholder="Start typing your text here..."
                 name="text"
-              >Here is a card with filled data</textarea>
+              >${description}</textarea>
             </label>
           </div>
 
@@ -34,7 +44,7 @@ export const createTaskEditTemplate = () => {
                       type="text"
                       placeholder=""
                       name="date"
-                      value="23 September 16:15"
+                      value="${date} ${time}"
                     />
                   </label>
                 </fieldset>
