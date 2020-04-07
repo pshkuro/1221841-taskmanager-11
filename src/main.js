@@ -5,6 +5,7 @@ import {createSortingTemplate} from "./components/sorting";
 import {createTaskEditTemplate} from "./components/task-edit";
 import {createTaskTemplate} from "./components/task";
 import {createLoadMoreButtonTemplate} from "./components/load-more-button";
+import {generateFilters} from "./mock/filter";
 
 const TASK_COUNT = 3;
 const siteMainElement = document.querySelector(`.main`);
@@ -16,9 +17,10 @@ const render = (container, template, place) => {
   container.insertAdjacentHTML(place, template);
 };
 
+const filters = generateFilters();
 
 render(siteHeaderElement, createSiteMenuTemplate(), `beforeend`);
-render(siteMainElement, createFilterTemplate(), `beforeend`);
+render(siteMainElement, createFilterTemplate(filters), `beforeend`);
 render(siteMainElement, createBoardTemplate(), `beforeend`);
 
 const taskListElement = siteMainElement.querySelector(`.board__tasks`);
