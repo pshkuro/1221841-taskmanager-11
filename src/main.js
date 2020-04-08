@@ -14,14 +14,15 @@ const SHOWING_TASKS_COUNT_BY_BUTTON = 8;
 const siteMainElement = document.querySelector(`.main`);
 const siteHeaderElement = siteMainElement.querySelector(`.main__control`);
 
+let showingTasksCount = SHOWING_TASKS_COUNT_ON_START;
 
 // Ф рендеринга
 const render = (container, template, place) => {
   container.insertAdjacentHTML(place, template);
 };
 
-const filters = generateFilters();
 const tasks = generateTasks(TASK_COUNT);
+const filters = generateFilters(tasks);
 
 render(siteHeaderElement, createSiteMenuTemplate(), `beforeend`);
 render(siteMainElement, createFilterTemplate(filters), `beforeend`);
@@ -33,10 +34,9 @@ const boardElement = siteMainElement.querySelector(`.board`);
 render(boardElement, createSortingTemplate(), `afterbegin`);
 render(taskListElement, createTaskEditTemplate(tasks[0]), `beforeend`);
 
-let showingTasksCount = SHOWING_TASKS_COUNT_ON_START;
-
-// Отрсиовка эл-ов разметки на страницу
+// Отрсиовка карточек на страницу
 tasks.slice(1, showingTasksCount).forEach((i) => render(taskListElement, createTaskTemplate(i), `beforeend`));
+
 
 render(boardElement, createLoadMoreButtonTemplate(), `beforeend`);
 

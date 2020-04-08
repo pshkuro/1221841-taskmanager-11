@@ -33,3 +33,6 @@ export const getRandomDate = () => {
   return targetDate;
 };
 
+// Проверяет, является ли дата сег днем
+export const isToday = (date) => date.getDate() === new Date().getDate();
+
