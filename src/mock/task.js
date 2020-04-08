@@ -1,5 +1,5 @@
 import {getRandomArrayItem, getRandomDate} from "../util";
-import {DESCRIPTION_ITEMS, COLORS} from "../const";
+import {DESCRIPTION_ITEMS, COLORS, DAYS} from "../const";
 
 const DefaultRepeatingDays = {
   "mo": false,
@@ -11,9 +11,10 @@ const DefaultRepeatingDays = {
   "su": false,
 };
 
+
 const generateRepeatingDays = () => {
   return Object.assign({}, DefaultRepeatingDays, {
-    "mo": Math.random() > 0.5,
+    [getRandomArrayItem(DAYS)]: Math.random() > 0.5,
   });
 };
 
