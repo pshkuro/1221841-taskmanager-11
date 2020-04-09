@@ -1,65 +1,30 @@
-// Ф генерации блока фильтров
-export const createFilterTemplate = () => {
+// Создание 1 блока фильтра
+const createFilterMarkup = (filter, isChecked) => {
+  const {name, count} = filter; // Собираем отдельные параметры в объект и исп деструктуризацию,
+  // чтобы каждый раз не обращаться filter.name...
+
   return (
-    `<section class="main__filter filter container">
-    <input
+    `<input
       type="radio"
-      id="filter__all"
+      id="filter__${name}"
       class="filter__input visually-hidden"
       name="filter"
-      checked
+      ${isChecked ? `checked` : ``}
     />
-    <label for="filter__all" class="filter__label">
-      All <span class="filter__all-count">13</span></label
-    >
-    <input
-      type="radio"
-      id="filter__overdue"
-      class="filter__input visually-hidden"
-      name="filter"
-      disabled
-    />
-    <label for="filter__overdue" class="filter__label"
-      >Overdue <span class="filter__overdue-count">0</span></label
-    >
-    <input
-      type="radio"
-      id="filter__today"
-      class="filter__input visually-hidden"
-      name="filter"
-      disabled
-    />
-    <label for="filter__today" class="filter__label"
-      >Today <span class="filter__today-count">0</span></label
-    >
-    <input
-      type="radio"
-      id="filter__favorites"
-      class="filter__input visually-hidden"
-      name="filter"
-    />
-    <label for="filter__favorites" class="filter__label"
-      >Favorites <span class="filter__favorites-count">1</span></label
-    >
-    <input
-      type="radio"
-      id="filter__repeating"
-      class="filter__input visually-hidden"
-      name="filter"
-    />
-    <label for="filter__repeating" class="filter__label"
-      >Repeating <span class="filter__repeating-count">1</span></label
-    >
-    <input
-      type="radio"
-      id="filter__archive"
-      class="filter__input visually-hidden"
-      name="filter"
-    />
-    <label for="filter__archive" class="filter__label"
-      >Archive <span class="filter__archive-count">115</span></label
-    >
-  </section>`
+    <label for="filter__${name}" class="filter__label">
+      ${name} <span class="filter__${name}-count">${count}</span></label
+    >`
   );
+};
+
+
+// Ф генерации блока фильтров
+export const createFilterTemplate = (filters) => {
+
+  const filterMarkup = filters.map((it, i) => createFilterMarkup(it, i === 0)).join(`\n`);
+
+  return `<section class="main__filter filter container">
+    ${filterMarkup}
+  </section>`;
 };
 
