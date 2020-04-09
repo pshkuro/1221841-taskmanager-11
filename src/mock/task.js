@@ -30,6 +30,8 @@ const generateTask = () => {
     isArchive: Math.random() > 0.5,
     isFavorite: Math.random() > 0.5,
   };
+
+
 };
 
 const generateTasks = (count) => {

@@ -3,38 +3,38 @@ import {formatTime} from "../util";
 
 // Генерация блока выбора цвета
 const createColorsMarkup = (colors, currentColor) => {
-  return colors.map((it, index) => {
+  return colors.map((color, index) => {
     return (`<input
     type="radio"
-    id="color-${it}-${index}"
-    class="card__color-input card__color-input--${it} visually-hidden"
+    id="color-${color}-${index}"
+    class="card__color-input card__color-input--${color} visually-hidden"
     name="color"
-    value="${it}"
-    ${currentColor === it ? `checked` : ``}
+    value="${color}"
+    ${currentColor === color ? `checked` : ``}
   />
   <label
-    for="color-${it}-${index}"
-    class="card__color card__color--${it}"
-    >${it}</label
+    for="color-${color}-${index}"
+    class="card__color card__color--${color}"
+    >${color}</label
   >`);
   }).join(`\n`);
 };
 
 // Генерация блока выбора дня недели
 const createRepeatingDaysMarkup = (days, repeatingDays) => {
-  return days.map((it, index) => {
-    const isChecked = repeatingDays[it];
+  return days.map((day, index) => {
+    const isChecked = repeatingDays[day];
     return (
       `<input
       class="visually-hidden card__repeat-day-input"
       type="checkbox"
-      id="repeat-${it}-${index}"
+      id="repeat-${day}-${index}"
       name="repeat"
-      value="${it}"
+      value="${day}"
       ${isChecked ? `checked` : ``}
     />
-    <label class="card__repeat-day" for="repeat-${it}-${index}"
-      >${it}</label
+    <label class="card__repeat-day" for="repeat-${day}-${index}"
+      >${day}</label
     >`
     );
   }).join(`\n`);
@@ -106,12 +106,12 @@ export const createTaskEditTemplate = (task) => {
                   repeat:<span class="card__repeat-status">yes</span>
                 </button>
                 
-              ${isRepeatingTask ?
-      `<fieldset class="card__repeat-days">
+              
+      <fieldset class="card__repeat-days">
                   <div class="card__repeat-days-inner">
                     ${repeatingDaysMarkup}
                   </div>
-                </fieldset>` : ``}
+                </fieldset> 
               </div>
             </div>
 

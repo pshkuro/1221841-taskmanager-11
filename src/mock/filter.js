@@ -11,9 +11,9 @@ const generateFilters = (tasks) => {
 
   const filtersData = [tasks.length, overdueCount.length, todayTasksCount.length, favoriteCount.length, repeatingDaysCount.length, archiveCount.length];
 
-  return FILTER_NAMES.map((it, index) => {
+  return FILTER_NAMES.map((filterName, index) => {
     return {
-      name: it,
+      name: filterName,
       count: filtersData[index],
     };
   });

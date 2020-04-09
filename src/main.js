@@ -35,7 +35,7 @@ render(boardElement, createSortingTemplate(), `afterbegin`);
 render(taskListElement, createTaskEditTemplate(tasks[0]), `beforeend`);
 
 // Отрсиовка карточек на страницу
-tasks.slice(1, showingTasksCount).forEach((i) => render(taskListElement, createTaskTemplate(i), `beforeend`));
+tasks.slice(1, showingTasksCount).forEach((task) => render(taskListElement, createTaskTemplate(task), `beforeend`));
 
 
 render(boardElement, createLoadMoreButtonTemplate(), `beforeend`);
