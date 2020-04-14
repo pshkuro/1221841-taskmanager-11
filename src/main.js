@@ -1,12 +1,14 @@
-import {createSiteMenuTemplate} from "./components/site-menu";
-import {createFilterTemplate} from "./components/filter";
-import {createBoardTemplate} from "./components/boards";
-import {createSortingTemplate} from "./components/sorting";
-import {createTaskEditTemplate} from "./components/task-edit";
-import {createTaskTemplate} from "./components/task";
-import {createLoadMoreButtonTemplate} from "./components/load-more-button";
+import SiteMenuCopmonent from "./components/site-menu";
+import FilterCopmonent from "./components/filter";
+import BoardCopmonent from "./components/boards";
+import SortCopmonent from "./components/sorting";
+import TaskEditCopmonent from "./components/task-edit";
+import TaskCopmonent from "./components/task";
+import LoadMoreButtonCopmonent from "./components/load-more-button";
+import TasksCopmonent from "./components/tasks";
 import {generateFilters} from "./mock/filter";
 import {generateTasks} from "./mock/task";
+import {renderPosition, render} from "./util";
 
 const TASK_COUNT = 22;
 const SHOWING_TASKS_COUNT_ON_START = 8;
@@ -16,10 +18,6 @@ const siteHeaderElement = siteMainElement.querySelector(`.main__control`);
 
 let showingTasksCount = SHOWING_TASKS_COUNT_ON_START;
 
-// Ф рендеринга
-const render = (container, template, place) => {
-  container.insertAdjacentHTML(place, template);
-};
 
 const tasks = generateTasks(TASK_COUNT);
 const filters = generateFilters(tasks);

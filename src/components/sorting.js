@@ -8,7 +8,7 @@ const createSortingTemplate = () => {
   </div>`;
 };
 
-export default class Sort {
+export default class SortCopmonent {
   constructor() {
     this._element = null;
   }

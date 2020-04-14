@@ -7,7 +7,7 @@ const createBoardTemplate = () => {
   );
 };
 
-export default class Board {
+export default class BoardCopmonent {
   constructor() {
     this._element = null;
   }

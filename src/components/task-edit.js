@@ -133,7 +133,7 @@ const createTaskEditTemplate = (task) => {
   );
 };
 
-export default class TaskEdit {
+export default class TaskEditCopmonent {
   constructor(task) {
     this._task = task;
     this._element = null;

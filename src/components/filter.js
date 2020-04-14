@@ -30,7 +30,7 @@ const createFilterTemplate = (filters) => {
   </section>`;
 };
 
-export default class Filter {
+export default class FilterCopmonent {
   constructor(filters) {
     this._filters = filters;
     this._element = null;

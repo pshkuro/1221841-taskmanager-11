@@ -61,7 +61,7 @@ const createTaskTemplate = (task) => {
   </article>`;
 };
 
-export default class Task {
+export default class TaskCopmonent {
 
   constructor(task) { // В Task передаются данные(объекты) карточек, сейчас моки, потом с сервера
     this._task = task;

@@ -1,3 +1,8 @@
+export const renderPosition = {
+  AFTERBEGIN: `afterbegin`,
+  BEFOREEND: `beforeend`
+};
+
 // Функция для создания DOM-Элемента
 // Берет строку-разметку, првращает в Dom элемент и возвращаю
 export const createElement = (template) => { // Принимает шаблонную строку (getTemplate)
@@ -5,6 +10,18 @@ export const createElement = (template) => { // Принимает шаблон�
   newElement.innerHTML = template; // Вставляем нашу строку(разметку) в созданный div
 
   return newElement.firstChild;
+};
+
+// Функция рендеринга DOM-эл
+export const render = (container, element, place) => {
+  switch (place) {
+    case renderPosition.AFTERBEGIN:
+      container.prepend(element);
+      break;
+    case renderPosition.BEFOREEND:
+      container.append(element);
+      break;
+  }
 };
 
 // Приведение времени к нужному формату - сроке
