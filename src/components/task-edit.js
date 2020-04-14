@@ -1,5 +1,5 @@
 import {DAYS, COLORS, MONTH_NAMES} from "../const";
-import {formatTime} from "../util";
+import {formatTime, createElement} from "../util";
 
 // Генерация блока выбора цвета
 const createColorsMarkup = (colors, currentColor) => {
@@ -42,7 +42,7 @@ const createRepeatingDaysMarkup = (days, repeatingDays) => {
 
 
 // Ф генерации карточки задачи
-export const createTaskEditTemplate = (task) => {
+const createTaskEditTemplate = (task) => {
   const {description, dueDate, color, repeatingDays} = task;
 
   // Флаг, что задача просрочена
@@ -132,3 +132,26 @@ export const createTaskEditTemplate = (task) => {
     </article>`
   );
 };
+
+export default class TaskEdit {
+  constructor(task) {
+    this._task = task;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createTaskEditTemplate(this._task);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

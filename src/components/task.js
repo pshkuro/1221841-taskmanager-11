@@ -74,7 +74,7 @@ export default class Task {
   }
 
   getElement() {
-    if (!this._element) {
+    if (!this._element) { // Если элемента нет, создаем его
       this._element = createElement(this.getTemplate()); // Создает DOM_элемент на основе сгенерир строки(разметки)
     }
 
