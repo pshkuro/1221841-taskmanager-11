@@ -1,3 +1,12 @@
+// Функция для создания DOM-Элемента
+// Берет строку-разметку, првращает в Dom элемент и возвращаю
+export const createElement = (template) => { // Принимает шаблонную строку (getTemplate)
+  const newElement = document.createElement(`div`);
+  newElement.innerHTML = template; // Вставляем нашу строку(разметку) в созданный div
+
+  return newElement.firstChild;
+};
+
 // Приведение времени к нужному формату - сроке
 const castTimeFormat = (value) => {
   return value < 10 ? `0${value}` : String(value);
