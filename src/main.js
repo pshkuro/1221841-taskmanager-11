@@ -13,44 +13,77 @@ import {renderPosition, render} from "./util";
 const TASK_COUNT = 22;
 const SHOWING_TASKS_COUNT_ON_START = 8;
 const SHOWING_TASKS_COUNT_BY_BUTTON = 8;
+
+// Логика отрисовка 1 карточки
+const renderTask = (taskElement, task) => {
+
+  const taskComponent = new TaskCopmonent(task);
+  const taskEditComponent = new TaskEditCopmonent(task);
+  const editButton = taskComponent.getElement().querySelector(`.card__btn--edit`);
+  const editForm = taskEditComponent.getElement().querySelector(`form`);
+
+  const onEditButtonClick = () => { // Заменяем карточку на форму редактирование
+    taskElement.replaceChild(taskEditComponent.getElement(), taskComponent.getElement()); // по клику на кнопку Edit в карточке
+  };
+
+  const onEditFormSubmit = (evt) => { // Заменяем форму редактирования на карточку
+    evt.preventDefault();
+    taskElement.replaceChild(taskComponent.getElement(), taskEditComponent.getElement());
+  };
+
+  editButton.addEventListener(`click`, onEditButtonClick);
+  editForm.addEventListener(`submit`, onEditFormSubmit);
+
+  render(taskElement, taskComponent.getElement(), renderPosition.BEFOREEND); // Отрисовываем карточку
+
+};
+
+
+// Логика отрисовки всего, что внутри Boad Container
+const renderBoard = (boardComponent, tasksData) => {
+
+  // const boardComponent = boardContainer.getElement();
+  render(boardComponent.getElement(), new SortCopmonent().getElement(), renderPosition.BEFOREEND);
+  render(boardComponent.getElement(), new TasksCopmonent().getElement(), renderPosition.BEFOREEND);
+
+
+  // Отрисовываем наши карточки
+  const taskListElement = boardComponent.getElement().querySelector(`.board__tasks`);
+  let showingTasksCount = SHOWING_TASKS_COUNT_ON_START;
+  tasksData.slice(0, showingTasksCount)
+    .forEach((task) => {
+      renderTask(taskListElement, task);
+    });
+
+  // Логика кнопки LoadMoreButton
+  const loadMoreButtonCopmonent = new LoadMoreButtonCopmonent();
+  render(boardComponent.getElement(), loadMoreButtonCopmonent.getElement(), renderPosition.BEFOREEND); // Отрисовка кнопки
+
+  loadMoreButtonCopmonent.getElement().addEventListener(`click`, function () { // По щелчку подгружаем еще карточки
+    const prevTasksCount = showingTasksCount;
+    showingTasksCount = showingTasksCount + SHOWING_TASKS_COUNT_BY_BUTTON;
+
+    tasksData.slice(prevTasksCount, showingTasksCount)
+    .forEach((task) => renderTask(taskListElement, task));
+
+    if (showingTasksCount >= tasks.length) {
+      loadMoreButtonCopmonent.getElement().remove();
+      loadMoreButtonCopmonent.removeElement();
+    }
+  });
+};
+
 const siteMainElement = document.querySelector(`.main`);
 const siteHeaderElement = siteMainElement.querySelector(`.main__control`);
-
-let showingTasksCount = SHOWING_TASKS_COUNT_ON_START;
-
 
 const tasks = generateTasks(TASK_COUNT);
 const filters = generateFilters(tasks);
 
-render(siteHeaderElement, createSiteMenuTemplate(), `beforeend`);
-render(siteMainElement, createFilterTemplate(filters), `beforeend`);
-render(siteMainElement, createBoardTemplate(), `beforeend`);
+// Отрисовка Шапки меню и Фильтров
+render(siteHeaderElement, new SiteMenuCopmonent().getElement(), renderPosition.BEFOREEND);
+render(siteMainElement, new FilterCopmonent(filters).getElement(), renderPosition.BEFOREEND);
 
-const taskListElement = siteMainElement.querySelector(`.board__tasks`);
-const boardElement = siteMainElement.querySelector(`.board`);
-
-render(boardElement, createSortingTemplate(), `afterbegin`);
-render(taskListElement, createTaskEditTemplate(tasks[0]), `beforeend`);
-
-// Отрсиовка карточек на страницу
-tasks.slice(1, showingTasksCount).forEach((task) => render(taskListElement, createTaskTemplate(task), `beforeend`));
-
-
-render(boardElement, createLoadMoreButtonTemplate(), `beforeend`);
-
-const loadMoreButton = boardElement.querySelector(`.load-more`);
-
-// Загружаем карточки дополинтельно по клике на кнопку load-more
-loadMoreButton.addEventListener(`click`, function clickButtonMore() {
-  const prevTasksCount = showingTasksCount;
-  showingTasksCount = showingTasksCount + SHOWING_TASKS_COUNT_BY_BUTTON;
-
-  tasks.slice(prevTasksCount, showingTasksCount)
-  .forEach((task) => render(taskListElement, createTaskTemplate(task), `beforeend`));
-
-  if (showingTasksCount > tasks.length) {
-    loadMoreButton.remove();
-  }
-});
-
+const boardComponent = new BoardCopmonent();
+render(siteMainElement, boardComponent.getElement(), renderPosition.BEFOREEND);
+renderBoard(boardComponent, tasks);
 
