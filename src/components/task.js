@@ -1,8 +1,8 @@
 import {MONTH_NAMES} from "../const";
-import {formatTime} from "../util";
+import {formatTime, createElement} from "../util";
 
 // Ф генерации формы создания/редактирования задачи
-export const createTaskTemplate = (task) => {
+const createTaskTemplate = (task) => {
   const {description, dueDate, color, repeatingDays, isArchive, isFavorite} = task;
 
   const isExpired = dueDate instanceof Date && dueDate < Date.now();
@@ -60,3 +60,29 @@ export const createTaskTemplate = (task) => {
     </div>
   </article>`;
 };
+
+export default class Task {
+
+  constructor(task) { // В Task передаются данные(объекты) карточек, сейчас моки, потом с сервера
+    this._task = task;
+
+    this._element = null; // Создали пустой элемент карточки
+  }
+
+  getTemplate() {
+    return createTaskTemplate(this._task); // Разметка нашей карточки, в которую передаем данные карточки - task
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate()); // Создает DOM_элемент на основе сгенерир строки(разметки)
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null; // Отчищает ресурс, удаляет ссылку на созданный DOM-элемент
+  }
+
+}
