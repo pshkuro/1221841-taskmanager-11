@@ -1,11 +1,5 @@
 import {createElement} from "../util";
 
-// Ф генерации блока доски задач
-const createBoardTemplate = () => {
-  return (
-    `<section class="board container"></section>`
-  );
-};
 
 export default class BoardCopmonent {
   constructor() {
@@ -13,7 +7,9 @@ export default class BoardCopmonent {
   }
 
   getTemplate() {
-    return createBoardTemplate();
+    return (
+      `<section class="board container"></section>`
+    );
   }
 
   getElement() {

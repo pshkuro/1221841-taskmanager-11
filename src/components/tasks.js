@@ -1,10 +1,5 @@
 import {createElement} from "../util";
 
-const createTasksTemplate = () => {
-  return (
-    `<div class="board__tasks"></div>`
-  );
-};
 
 export default class TasksCopmonent {
   constructor() {
@@ -12,7 +7,9 @@ export default class TasksCopmonent {
   }
 
   getTemplate() {
-    return createTasksTemplate();
+    return (
+      `<div class="board__tasks"></div>`
+    );
   }
 
   getElement() {

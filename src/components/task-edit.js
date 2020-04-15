@@ -1,10 +1,18 @@
 import {DAYS, COLORS, MONTH_NAMES} from "../const";
 import {formatTime, createElement} from "../util";
 
-// Генерация блока выбора цвета
-const createColorsMarkup = (colors, currentColor) => {
-  return colors.map((color, index) => {
-    return (`<input
+
+export default class TaskEditCopmonent {
+  constructor(task) {
+    this._task = task;
+    this._element = null;
+    this.init();
+  }
+
+  // Генерация блока выбора цвета
+  createColorsMarkupTemplate(colors, currentColor) {
+    return colors.map((color, index) => {
+      return (`<input
     type="radio"
     id="color-${color}-${index}"
     class="card__color-input card__color-input--${color} visually-hidden"
@@ -17,130 +25,123 @@ const createColorsMarkup = (colors, currentColor) => {
     class="card__color card__color--${color}"
     >${color}</label
   >`);
-  }).join(`\n`);
-};
+    }).join(`\n`);
+  }
 
-// Генерация блока выбора дня недели
-const createRepeatingDaysMarkup = (days, repeatingDays) => {
-  return days.map((day, index) => {
-    const isChecked = repeatingDays[day];
-    return (
-      `<input
-      class="visually-hidden card__repeat-day-input"
-      type="checkbox"
-      id="repeat-${day}-${index}"
-      name="repeat"
-      value="${day}"
-      ${isChecked ? `checked` : ``}
-    />
-    <label class="card__repeat-day" for="repeat-${day}-${index}"
-      >${day}</label
-    >`
-    );
-  }).join(`\n`);
-};
+  // Генерация блока выбора дня недели
+  createRepeatingDaysMarkupTemplate(days, repeatingDays) {
+    return days.map((day, index) => {
+      const isChecked = repeatingDays[day];
+      return (
+        `<input
+        class="visually-hidden card__repeat-day-input"
+        type="checkbox"
+        id="repeat-${day}-${index}"
+        name="repeat"
+        value="${day}"
+        ${isChecked ? `checked` : ``}
+      />
+      <label class="card__repeat-day" for="repeat-${day}-${index}"
+        >${day}</label
+      >`
+      );
+    }).join(`\n`);
+  }
 
+  init() {
+    const {description, dueDate, color, repeatingDays} = this._task;
 
-// Ф генерации карточки задачи
-const createTaskEditTemplate = (task) => {
-  const {description, dueDate, color, repeatingDays} = task;
+    this._description = description;
+    this._color = color;
+    // Флаг, что задача просрочена
+    // (создан ли dueDate с пом-ю конструктора Date (мб придет объект другого типа, тогда = null и авто задача Expired)
+    const isExpired = dueDate instanceof Date && dueDate < Date.now();
+    this._isDateShowing = Boolean(dueDate); // Проверка, приходит ли такой объект, или нет (true/false)
 
-  // Флаг, что задача просрочена
-  // (создан ли dueDate с пом-ю конструктора Date (мб придет объект другого типа, тогда = null и авто задача Expired)
-  const isExpired = dueDate instanceof Date && dueDate < Date.now();
-  const isDateShowing = Boolean(dueDate); // Проверка, приходит ли такой объект, или нет (true/false)
+    this._date = this._isDateShowing ? `${dueDate.getDate()} ${MONTH_NAMES[dueDate.getMonth()]}` : ``;
+    this._time = this._isDateShowing ? formatTime(dueDate) : ``;
 
-  const date = isDateShowing ? `${dueDate.getDate()} ${MONTH_NAMES[dueDate.getMonth()]}` : ``;
-  const time = isDateShowing ? formatTime(dueDate) : ``;
+    // Флаг возвращает true, если
+    // хотя бы 1 эл true из repeatingDays
+    const isRepeatingTask = Object.values(repeatingDays).some(Boolean);
+    this._classRepeat = isRepeatingTask ? `card--repeat` : ``;
+    this._classDeadline = isExpired ? `card--deadline` : ``; // Если задача просрочена, доб класс deadline, иначе ничего
 
-  // Флаг возвращает true, если
-  // хотя бы 1 эл true из repeatingDays
-  const isRepeatingTask = Object.values(repeatingDays).some(Boolean);
-  const classRepeat = isRepeatingTask ? `card--repeat` : ``;
-  const classDeadline = isExpired ? `card--deadline` : ``; // Если задача просрочена, доб класс deadline, иначе ничего
+    this._colorsMarkup = this.createColorsMarkupTemplate(COLORS, color);
+    this._repeatingDaysMarkup = this.createRepeatingDaysMarkupTemplate(DAYS, repeatingDays);
 
-  const colorsMarkup = createColorsMarkup(COLORS, color);
-  const repeatingDaysMarkup = createRepeatingDaysMarkup(DAYS, repeatingDays);
-
-  return (
-    `<article class="card card--edit card--${color} ${classRepeat} ${classDeadline}">
-      <form class="card__form" method="get">
-        <div class="card__inner">
-          <div class="card__color-bar">
-            <svg class="card__color-bar-wave" width="100%" height="10">
-              <use xlink:href="#wave"></use>
-            </svg>
-          </div>
-
-          <div class="card__textarea-wrap">
-            <label>
-              <textarea
-                class="card__text"
-                placeholder="Start typing your text here..."
-                name="text"
-              >${description}</textarea>
-            </label>
-          </div>
-
-          <div class="card__settings">
-            <div class="card__details">
-              <div class="card__dates">
-                <button class="card__date-deadline-toggle" type="button">
-                  date: <span class="card__date-status">${isDateShowing ? `yes` : `no`}</span>
-                </button>
-
-                ${isDateShowing ?
-      `<fieldset class="card__date-deadline">
-                  <label class="card__input-deadline-wrap">
-                    <input
-                      class="card__date"
-                      type="text"
-                      placeholder=""
-                      name="date"
-                      value="${date} ${time}"
-                    />
-                  </label>
-                </fieldset>` : ``}
-
-                <button class="card__repeat-toggle" type="button">
-                  repeat:<span class="card__repeat-status">yes</span>
-                </button>
-                
-              
-      <fieldset class="card__repeat-days">
-                  <div class="card__repeat-days-inner">
-                    ${repeatingDaysMarkup}
-                  </div>
-                </fieldset> 
-              </div>
-            </div>
-
-            <div class="card__colors-inner">
-              <h3 class="card__colors-title">Color</h3>
-              <div class="card__colors-wrap">
-                ${colorsMarkup}
-              </div>
-            </div>
-          </div>
-
-          <div class="card__status-btns">
-            <button class="card__save" type="submit">save</button>
-            <button class="card__delete" type="button">delete</button>
-          </div>
-        </div>
-      </form>
-    </article>`
-  );
-};
-
-export default class TaskEditCopmonent {
-  constructor(task) {
-    this._task = task;
-    this._element = null;
   }
 
   getTemplate() {
-    return createTaskEditTemplate(this._task);
+    return (
+      `<article class="card card--edit card--${this._color} ${this._classRepeat} ${this._classDeadline}">
+        <form class="card__form" method="get">
+          <div class="card__inner">
+            <div class="card__color-bar">
+              <svg class="card__color-bar-wave" width="100%" height="10">
+                <use xlink:href="#wave"></use>
+              </svg>
+            </div>
+  
+            <div class="card__textarea-wrap">
+              <label>
+                <textarea
+                  class="card__text"
+                  placeholder="Start typing your text here..."
+                  name="text"
+                >${this._description}</textarea>
+              </label>
+            </div>
+  
+            <div class="card__settings">
+              <div class="card__details">
+                <div class="card__dates">
+                  <button class="card__date-deadline-toggle" type="button">
+                    date: <span class="card__date-status">${this._isDateShowing ? `yes` : `no`}</span>
+                  </button>
+  
+                  ${this._isDateShowing ?
+        `<fieldset class="card__date-deadline">
+                    <label class="card__input-deadline-wrap">
+                      <input
+                        class="card__date"
+                        type="text"
+                        placeholder=""
+                        name="date"
+                        value="${this._date} ${this._time}"
+                      />
+                    </label>
+                  </fieldset>` : ``}
+  
+                  <button class="card__repeat-toggle" type="button">
+                    repeat:<span class="card__repeat-status">yes</span>
+                  </button>
+                  
+                
+        <fieldset class="card__repeat-days">
+                    <div class="card__repeat-days-inner">
+                      ${this._repeatingDaysMarkup}
+                    </div>
+                  </fieldset> 
+                </div>
+              </div>
+  
+              <div class="card__colors-inner">
+                <h3 class="card__colors-title">Color</h3>
+                <div class="card__colors-wrap">
+                  ${this._colorsMarkup}
+                </div>
+              </div>
+            </div>
+  
+            <div class="card__status-btns">
+              <button class="card__save" type="submit">save</button>
+              <button class="card__delete" type="button">delete</button>
+            </div>
+          </div>
+        </form>
+      </article>`
+    );
   }
 
   getElement() {

@@ -1,34 +1,46 @@
 import {MONTH_NAMES} from "../const";
 import {formatTime, createElement} from "../util";
 
-// Ф генерации формы создания/редактирования задачи
-const createTaskTemplate = (task) => {
-  const {description, dueDate, color, repeatingDays, isArchive, isFavorite} = task;
+export default class TaskCopmonent {
 
-  const isExpired = dueDate instanceof Date && dueDate < Date.now();
-  const isDateShowing = !!dueDate;
+  constructor(task) { // В Task передаются данные(объекты) карточек, сейчас моки, потом с сервера
+    this._task = task;
+    this._element = null; // Создали пустой элемент карточки
+    this.init();
+  }
 
-  const date = isDateShowing ? `${dueDate.getDate()} ${MONTH_NAMES[dueDate.getMonth()]}` : ``;
-  const time = isDateShowing ? formatTime(dueDate) : ``;
+  init() {
+    const {description, dueDate, color, repeatingDays, isArchive, isFavorite} = this._task;
 
-  const repeatClass = Object.values(repeatingDays).some(Boolean) ? `card--repeat` : ``;
-  const deadlineClass = isExpired ? `card--deadline` : ``;
-  const archiveButtonInactiveClass = isArchive ? `` : `card__btn--disabled`;
-  const favoriteButtonInactiveClass = isFavorite ? `` : `card__btn--disabled`;
+    this._description = description;
+    this._color = color;
 
-  return `<article class="card card--${color} ${repeatClass} ${deadlineClass}">
+    const isExpired = dueDate instanceof Date && dueDate < Date.now();
+    const isDateShowing = !!dueDate;
+
+    this._date = isDateShowing ? `${dueDate.getDate()} ${MONTH_NAMES[dueDate.getMonth()]}` : ``;
+    this._time = isDateShowing ? formatTime(dueDate) : ``;
+
+    this._repeatClass = Object.values(repeatingDays).some(Boolean) ? `card--repeat` : ``;
+    this._deadlineClass = isExpired ? `card--deadline` : ``;
+    this._archiveButtonInactiveClass = isArchive ? `` : `card__btn--disabled`;
+    this._favoriteButtonInactiveClass = isFavorite ? `` : `card__btn--disabled`;
+  }
+
+  getTemplate() {
+    return `<article class="card card--${this._color} ${this._repeatClass} ${this._deadlineClass}">
     <div class="card__form">
       <div class="card__inner">
         <div class="card__control">
           <button type="button" class="card__btn card__btn--edit">
             edit
           </button>
-          <button type="button" class="card__btn card__btn--archive ${archiveButtonInactiveClass}">
+          <button type="button" class="card__btn card__btn--archive ${this._archiveButtonInactiveClass}">
             archive
           </button>
           <button
             type="button"
-            class="card__btn card__btn--favorites ${favoriteButtonInactiveClass}"
+            class="card__btn card__btn--favorites ${this._favoriteButtonInactiveClass}"
           >
             favorites
           </button>
@@ -41,7 +53,7 @@ const createTaskTemplate = (task) => {
         </div>
 
         <div class="card__textarea-wrap">
-          <p class="card__text">${description}</p>
+          <p class="card__text">${this._description}</p>
         </div>
 
         <div class="card__settings">
@@ -49,8 +61,8 @@ const createTaskTemplate = (task) => {
             <div class="card__dates">
               <div class="card__date-deadline">
                 <p class="card__input-deadline-wrap">
-                  <span class="card__date">${date}</span>
-                  <span class="card__time">${time}</span>
+                  <span class="card__date">${this._date}</span>
+                  <span class="card__time">${this._time}</span>
                 </p>
               </div>
             </div>
@@ -59,18 +71,6 @@ const createTaskTemplate = (task) => {
       </div>
     </div>
   </article>`;
-};
-
-export default class TaskCopmonent {
-
-  constructor(task) { // В Task передаются данные(объекты) карточек, сейчас моки, потом с сервера
-    this._task = task;
-
-    this._element = null; // Создали пустой элемент карточки
-  }
-
-  getTemplate() {
-    return createTaskTemplate(this._task); // Разметка нашей карточки, в которую передаем данные карточки - task
   }
 
   getElement() {
