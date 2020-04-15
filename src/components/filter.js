@@ -1,31 +1,18 @@
 import {createElement} from "../util";
+import FilterMarkupCopmonent from "./filter-markup";
 
 export default class FilterCopmonent {
   constructor(filters) {
     this._filters = filters;
     this._element = null;
+    this.init();
   }
 
-  getFilterMarkupTemplate(filter, isChecked) {
-    const {name, count} = filter;
-    return (
-      `<input
-        type="radio"
-        id="filter__${name}"
-        class="filter__input visually-hidden"
-        name="filter"
-        ${isChecked ? `checked` : ``}
-      />
-      <label for="filter__${name}" class="filter__label">
-        ${name} <span class="filter__${name}-count">${count}</span></label
-      >`
-    );
+  init() {
+    this._filterMarkup = this._filters.map((it, i) => new FilterMarkupCopmonent(it, i === 0).getTemplate()).join(`\n`);
   }
 
   getTemplate() {
-
-    this._filterMarkup = this._filters.map((it, i) => this.getFilterMarkupTemplate(it, i === 0)).join(`\n`);
-
     return `<section class="main__filter filter container">
               ${this._filterMarkup}
             </section>`;

@@ -1,5 +1,7 @@
 import {DAYS, COLORS, MONTH_NAMES} from "../const";
 import {formatTime, createElement} from "../util";
+import ColorMarkupComponent from "./task-color-markup";
+import RepeatingDaysMarkupComponent from "./task-repeatingDays-markup";
 
 
 export default class TaskEditCopmonent {
@@ -7,45 +9,6 @@ export default class TaskEditCopmonent {
     this._task = task;
     this._element = null;
     this.init();
-  }
-
-  // Генерация блока выбора цвета
-  createColorsMarkupTemplate(colors, currentColor) {
-    return colors.map((color, index) => {
-      return (`<input
-    type="radio"
-    id="color-${color}-${index}"
-    class="card__color-input card__color-input--${color} visually-hidden"
-    name="color"
-    value="${color}"
-    ${currentColor === color ? `checked` : ``}
-  />
-  <label
-    for="color-${color}-${index}"
-    class="card__color card__color--${color}"
-    >${color}</label
-  >`);
-    }).join(`\n`);
-  }
-
-  // Генерация блока выбора дня недели
-  createRepeatingDaysMarkupTemplate(days, repeatingDays) {
-    return days.map((day, index) => {
-      const isChecked = repeatingDays[day];
-      return (
-        `<input
-        class="visually-hidden card__repeat-day-input"
-        type="checkbox"
-        id="repeat-${day}-${index}"
-        name="repeat"
-        value="${day}"
-        ${isChecked ? `checked` : ``}
-      />
-      <label class="card__repeat-day" for="repeat-${day}-${index}"
-        >${day}</label
-      >`
-      );
-    }).join(`\n`);
   }
 
   init() {
@@ -67,8 +30,8 @@ export default class TaskEditCopmonent {
     this._classRepeat = isRepeatingTask ? `card--repeat` : ``;
     this._classDeadline = isExpired ? `card--deadline` : ``; // Если задача просрочена, доб класс deadline, иначе ничего
 
-    this._colorsMarkup = this.createColorsMarkupTemplate(COLORS, color);
-    this._repeatingDaysMarkup = this.createRepeatingDaysMarkupTemplate(DAYS, repeatingDays);
+    this._colorsMarkup = new ColorMarkupComponent(COLORS, color).getTemplate();
+    this._repeatingDaysMarkup = new RepeatingDaysMarkupComponent(DAYS, repeatingDays).getTemplate();
 
   }
 
