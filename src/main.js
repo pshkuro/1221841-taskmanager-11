@@ -6,6 +6,7 @@ import TaskEditCopmonent from "./components/task-edit";
 import TaskCopmonent from "./components/task";
 import LoadMoreButtonCopmonent from "./components/load-more-button";
 import TasksCopmonent from "./components/tasks";
+import NoTasks from "./components/no-tasks";
 import {generateFilters} from "./mock/filter";
 import {generateTasks} from "./mock/task";
 import {renderPosition, render} from "./util";
@@ -57,8 +58,13 @@ const renderTask = (taskElement, task) => {
 
 // Логика отрисовки всего, что внутри Boad Container
 const renderBoard = (boardComponent, tasksData) => {
+  const isAllTasksArchived = tasksData.every((task) => task.isArchive); // Проверяем, все ли задачи в архиве
 
-  // const boardComponent = boardContainer.getElement();
+  if (isAllTasksArchived) {
+    render(boardComponent.getElement(), new NoTasks().getElement(), renderPosition.BEFOREEND);
+    return;
+  }
+
   render(boardComponent.getElement(), new SortCopmonent().getElement(), renderPosition.BEFOREEND);
   render(boardComponent.getElement(), new TasksCopmonent().getElement(), renderPosition.BEFOREEND);
 
