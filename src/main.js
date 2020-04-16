@@ -22,17 +22,33 @@ const renderTask = (taskElement, task) => {
   const editButton = taskComponent.getElement().querySelector(`.card__btn--edit`);
   const editForm = taskEditComponent.getElement().querySelector(`form`);
 
-  const onEditButtonClick = () => { // Заменяем карточку на форму редактирование
+  const replaceTaskToEdit = () => { // Заменяем карточку на форму редактирование
     taskElement.replaceChild(taskEditComponent.getElement(), taskComponent.getElement()); // по клику на кнопку Edit в карточке
   };
 
-  const onEditFormSubmit = (evt) => { // Заменяем форму редактирования на карточку
-    evt.preventDefault();
+  const replaceEditToTask = () => { // Заменяем форму редактирования на карточку
     taskElement.replaceChild(taskComponent.getElement(), taskEditComponent.getElement());
   };
 
-  editButton.addEventListener(`click`, onEditButtonClick);
-  editForm.addEventListener(`submit`, onEditFormSubmit);
+  const onEscKeyDown = (evt) => {
+    const isEscKey = evt.key === `Escape` || evt.key === `Esc`;
+
+    if (isEscKey) {
+      replaceEditToTask();
+      document.removeEventListener(`keydown`, onEscKeyDown);
+    }
+  };
+
+  editButton.addEventListener(`click`, () => {
+    replaceTaskToEdit();
+    document.addEventListener(`keydown`, onEscKeyDown);
+  });
+
+  editForm.addEventListener(`submit`, (evt) => {
+    evt.preventDefault();
+    replaceEditToTask();
+    document.removeEventListener(`keydown`, onEscKeyDown);
+  });
 
   render(taskElement, taskComponent.getElement(), renderPosition.BEFOREEND); // Отрисовываем карточку
 
