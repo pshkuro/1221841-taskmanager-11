@@ -42,7 +42,6 @@ const renderTask = (taskElement, task) => {
 // Логика отрисовки всего, что внутри Boad Container
 const renderBoard = (boardComponent, tasksData) => {
 
-  // const boardComponent = boardContainer.getElement();
   render(boardComponent.getElement(), new SortCopmonent().getElement(), renderPosition.BEFOREEND);
   render(boardComponent.getElement(), new TasksCopmonent().getElement(), renderPosition.BEFOREEND);
 

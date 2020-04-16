@@ -6,36 +6,32 @@ import RepeatingDaysMarkupComponent from "./task-repeatingDays-markup";
 
 export default class TaskEditCopmonent {
   constructor(task) {
-    this._task = task;
     this._element = null;
-    this.init();
-  }
 
-  init() {
-    const {description, dueDate, color, repeatingDays} = this._task;
-
-    this._description = description;
-    this._color = color;
-    // Флаг, что задача просрочена
-    // (создан ли dueDate с пом-ю конструктора Date (мб придет объект другого типа, тогда = null и авто задача Expired)
-    const isExpired = dueDate instanceof Date && dueDate < Date.now();
-    this._isDateShowing = Boolean(dueDate); // Проверка, приходит ли такой объект, или нет (true/false)
-
-    this._date = this._isDateShowing ? `${dueDate.getDate()} ${MONTH_NAMES[dueDate.getMonth()]}` : ``;
-    this._time = this._isDateShowing ? formatTime(dueDate) : ``;
-
-    // Флаг возвращает true, если
-    // хотя бы 1 эл true из repeatingDays
-    const isRepeatingTask = Object.values(repeatingDays).some(Boolean);
-    this._classRepeat = isRepeatingTask ? `card--repeat` : ``;
-    this._classDeadline = isExpired ? `card--deadline` : ``; // Если задача просрочена, доб класс deadline, иначе ничего
-
-    this._colorsMarkup = new ColorMarkupComponent(COLORS, color).getTemplate();
-    this._repeatingDaysMarkup = new RepeatingDaysMarkupComponent(DAYS, repeatingDays).getTemplate();
-
+    this._description = task.description;
+    this._color = task.color;
+    this._dueDate = task.dueDate;
+    this._repeatingDays = task.repeatingDays;
   }
 
   getTemplate() {
+    // Флаг, что задача просрочена
+    // (создан ли dueDate с пом-ю конструктора Date (мб придет объект другого типа, тогда = null и авто задача Expired)
+    const isExpired = this._dueDate instanceof Date && this._dueDate < Date.now();
+    this._isDateShowing = Boolean(this._dueDate); // Проверка, приходит ли такой объект, или нет (true/false)
+
+    this._date = this._isDateShowing ? `${this._dueDate.getDate()} ${MONTH_NAMES[this._dueDate.getMonth()]}` : ``;
+    this._time = this._isDateShowing ? formatTime(this._dueDate) : ``;
+
+    // Флаг возвращает true, если
+    // хотя бы 1 эл true из repeatingDays
+    const isRepeatingTask = Object.values(this._repeatingDays).some(Boolean);
+    this._classRepeat = isRepeatingTask ? `card--repeat` : ``;
+    this._classDeadline = isExpired ? `card--deadline` : ``; // Если задача просрочена, доб класс deadline, иначе ничего
+
+    this._colorsMarkup = new ColorMarkupComponent(COLORS, this._color).getTemplate();
+    this._repeatingDaysMarkup = new RepeatingDaysMarkupComponent(DAYS, this._repeatingDays).getTemplate();
+
     return (
       `<article class="card card--edit card--${this._color} ${this._classRepeat} ${this._classDeadline}">
         <form class="card__form" method="get">

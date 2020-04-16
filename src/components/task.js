@@ -4,30 +4,29 @@ import {formatTime, createElement} from "../util";
 export default class TaskCopmonent {
 
   constructor(task) { // В Task передаются данные(объекты) карточек, сейчас моки, потом с сервера
-    this._task = task;
     this._element = null; // Создали пустой элемент карточки
-    this.init();
+
+    this._description = task.description;
+    this._color = task.color;
+    this._dueDate = task.dueDate;
+    this._repeatingDays = task.repeatingDays;
+    this._isArchive = task.isArchive;
+    this._isFavorite = task.isFavorite;
   }
 
-  init() {
-    const {description, dueDate, color, repeatingDays, isArchive, isFavorite} = this._task;
-
-    this._description = description;
-    this._color = color;
-
-    const isExpired = dueDate instanceof Date && dueDate < Date.now();
-    const isDateShowing = !!dueDate;
-
-    this._date = isDateShowing ? `${dueDate.getDate()} ${MONTH_NAMES[dueDate.getMonth()]}` : ``;
-    this._time = isDateShowing ? formatTime(dueDate) : ``;
-
-    this._repeatClass = Object.values(repeatingDays).some(Boolean) ? `card--repeat` : ``;
-    this._deadlineClass = isExpired ? `card--deadline` : ``;
-    this._archiveButtonInactiveClass = isArchive ? `` : `card__btn--disabled`;
-    this._favoriteButtonInactiveClass = isFavorite ? `` : `card__btn--disabled`;
-  }
 
   getTemplate() {
+    const isExpired = this._dueDate instanceof Date && this._dueDate < Date.now();
+    const isDateShowing = !!this._dueDate;
+
+    this._date = isDateShowing ? `${this._dueDate.getDate()} ${MONTH_NAMES[this._dueDate.getMonth()]}` : ``;
+    this._time = isDateShowing ? formatTime(this._dueDate) : ``;
+
+    this._repeatClass = Object.values(this._repeatingDays).some(Boolean) ? `card--repeat` : ``;
+    this._deadlineClass = isExpired ? `card--deadline` : ``;
+    this._archiveButtonInactiveClass = this._isArchive ? `` : `card__btn--disabled`;
+    this._favoriteButtonInactiveClass = this._isFavorite ? `` : `card__btn--disabled`;
+
     return `<article class="card card--${this._color} ${this._repeatClass} ${this._deadlineClass}">
     <div class="card__form">
       <div class="card__inner">
