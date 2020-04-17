@@ -1,19 +1,13 @@
 import {createElement} from "../util";
 
-export default class FilterMarkupCopmonent {
-  constructor(filters, isChecked) {
-    this._filters = filters;
+export default class FilterMarkupComponent {
+  constructor(filter, isChecked) {
     this._isChecked = isChecked;
     this._element = null;
-    this.init();
-  }
 
-  init() {
-    const {name, count} = this._filters;
-    this._name = name;
-    this._count = count;
+    this._name = filter.name;
+    this._count = filter.count;
   }
-
 
   getTemplate() {
     return (
