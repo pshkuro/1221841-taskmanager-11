@@ -8,9 +8,9 @@ export default class FilterCopmonent {
   }
 
   getTemplate() {
-    this._filterMarkup = this._filters.map((filter, i) => new FilterMarkupComponent(filter, i === 0).getTemplate()).join(`\n`);
+    const filterMarkup = this._filters.map((filter, i) => new FilterMarkupComponent(filter, i === 0).getTemplate()).join(`\n`);
     return `<section class="main__filter filter container">
-              ${this._filterMarkup}
+              ${filterMarkup}
             </section>`;
   }
 

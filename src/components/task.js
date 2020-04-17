@@ -19,27 +19,27 @@ export default class TaskCopmonent {
     const isExpired = this._dueDate instanceof Date && this._dueDate < Date.now();
     const isDateShowing = !!this._dueDate;
 
-    this._date = isDateShowing ? `${this._dueDate.getDate()} ${MONTH_NAMES[this._dueDate.getMonth()]}` : ``;
-    this._time = isDateShowing ? formatTime(this._dueDate) : ``;
+    const date = isDateShowing ? `${this._dueDate.getDate()} ${MONTH_NAMES[this._dueDate.getMonth()]}` : ``;
+    const time = isDateShowing ? formatTime(this._dueDate) : ``;
 
-    this._repeatClass = Object.values(this._repeatingDays).some(Boolean) ? `card--repeat` : ``;
-    this._deadlineClass = isExpired ? `card--deadline` : ``;
-    this._archiveButtonInactiveClass = this._isArchive ? `` : `card__btn--disabled`;
-    this._favoriteButtonInactiveClass = this._isFavorite ? `` : `card__btn--disabled`;
+    const repeatClass = Object.values(this._repeatingDays).some(Boolean) ? `card--repeat` : ``;
+    const deadlineClass = isExpired ? `card--deadline` : ``;
+    const archiveButtonInactiveClass = this._isArchive ? `` : `card__btn--disabled`;
+    const favoriteButtonInactiveClass = this._isFavorite ? `` : `card__btn--disabled`;
 
-    return `<article class="card card--${this._color} ${this._repeatClass} ${this._deadlineClass}">
+    return `<article class="card card--${this._color} ${repeatClass} ${deadlineClass}">
     <div class="card__form">
       <div class="card__inner">
         <div class="card__control">
           <button type="button" class="card__btn card__btn--edit">
             edit
           </button>
-          <button type="button" class="card__btn card__btn--archive ${this._archiveButtonInactiveClass}">
+          <button type="button" class="card__btn card__btn--archive ${archiveButtonInactiveClass}">
             archive
           </button>
           <button
             type="button"
-            class="card__btn card__btn--favorites ${this._favoriteButtonInactiveClass}"
+            class="card__btn card__btn--favorites ${favoriteButtonInactiveClass}"
           >
             favorites
           </button>
@@ -60,8 +60,8 @@ export default class TaskCopmonent {
             <div class="card__dates">
               <div class="card__date-deadline">
                 <p class="card__input-deadline-wrap">
-                  <span class="card__date">${this._date}</span>
-                  <span class="card__time">${this._time}</span>
+                  <span class="card__date">${date}</span>
+                  <span class="card__time">${time}</span>
                 </p>
               </div>
             </div>

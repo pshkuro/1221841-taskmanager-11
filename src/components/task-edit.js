@@ -18,22 +18,22 @@ export default class TaskEditCopmonent {
     // Флаг, что задача просрочена
     // (создан ли dueDate с пом-ю конструктора Date (мб придет объект другого типа, тогда = null и авто задача Expired)
     const isExpired = this._dueDate instanceof Date && this._dueDate < Date.now();
-    this._isDateShowing = Boolean(this._dueDate); // Проверка, приходит ли такой объект, или нет (true/false)
+    const isDateShowing = Boolean(this._dueDate); // Проверка, приходит ли такой объект, или нет (true/false)
 
-    this._date = this._isDateShowing ? `${this._dueDate.getDate()} ${MONTH_NAMES[this._dueDate.getMonth()]}` : ``;
-    this._time = this._isDateShowing ? formatTime(this._dueDate) : ``;
+    const date = isDateShowing ? `${this._dueDate.getDate()} ${MONTH_NAMES[this._dueDate.getMonth()]}` : ``;
+    const time = isDateShowing ? formatTime(this._dueDate) : ``;
 
     // Флаг возвращает true, если
     // хотя бы 1 эл true из repeatingDays
     const isRepeatingTask = Object.values(this._repeatingDays).some(Boolean);
-    this._classRepeat = isRepeatingTask ? `card--repeat` : ``;
-    this._classDeadline = isExpired ? `card--deadline` : ``; // Если задача просрочена, доб класс deadline, иначе ничего
+    const classRepeat = isRepeatingTask ? `card--repeat` : ``;
+    const classDeadline = isExpired ? `card--deadline` : ``; // Если задача просрочена, доб класс deadline, иначе ничего
 
-    this._colorsMarkup = new ColorMarkupComponent(COLORS, this._color).getTemplate();
-    this._repeatingDaysMarkup = new RepeatingDaysMarkupComponent(DAYS, this._repeatingDays).getTemplate();
+    const colorsMarkup = new ColorMarkupComponent(COLORS, this._color).getTemplate();
+    const repeatingDaysMarkup = new RepeatingDaysMarkupComponent(DAYS, this._repeatingDays).getTemplate();
 
     return (
-      `<article class="card card--edit card--${this._color} ${this._classRepeat} ${this._classDeadline}">
+      `<article class="card card--edit card--${this._color} ${classRepeat} ${classDeadline}">
         <form class="card__form" method="get">
           <div class="card__inner">
             <div class="card__color-bar">
@@ -56,10 +56,10 @@ export default class TaskEditCopmonent {
               <div class="card__details">
                 <div class="card__dates">
                   <button class="card__date-deadline-toggle" type="button">
-                    date: <span class="card__date-status">${this._isDateShowing ? `yes` : `no`}</span>
+                    date: <span class="card__date-status">${isDateShowing ? `yes` : `no`}</span>
                   </button>
   
-                  ${this._isDateShowing ?
+                  ${isDateShowing ?
         `<fieldset class="card__date-deadline">
                     <label class="card__input-deadline-wrap">
                       <input
@@ -67,7 +67,7 @@ export default class TaskEditCopmonent {
                         type="text"
                         placeholder=""
                         name="date"
-                        value="${this._date} ${this._time}"
+                        value="${date} ${time}"
                       />
                     </label>
                   </fieldset>` : ``}
@@ -79,7 +79,7 @@ export default class TaskEditCopmonent {
                 
         <fieldset class="card__repeat-days">
                     <div class="card__repeat-days-inner">
-                      ${this._repeatingDaysMarkup}
+                      ${repeatingDaysMarkup}
                     </div>
                   </fieldset> 
                 </div>
@@ -88,7 +88,7 @@ export default class TaskEditCopmonent {
               <div class="card__colors-inner">
                 <h3 class="card__colors-title">Color</h3>
                 <div class="card__colors-wrap">
-                  ${this._colorsMarkup}
+                  ${colorsMarkup}
                 </div>
               </div>
             </div>
