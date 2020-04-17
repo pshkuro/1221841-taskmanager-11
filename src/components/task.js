@@ -1,22 +1,33 @@
 import {MONTH_NAMES} from "../const";
-import {formatTime} from "../util";
+import {formatTime, createElement} from "../util";
 
-// Ф генерации формы создания/редактирования задачи
-export const createTaskTemplate = (task) => {
-  const {description, dueDate, color, repeatingDays, isArchive, isFavorite} = task;
+export default class TaskCopmonent {
 
-  const isExpired = dueDate instanceof Date && dueDate < Date.now();
-  const isDateShowing = !!dueDate;
+  constructor(task) { // В Task передаются данные(объекты) карточек, сейчас моки, потом с сервера
+    this._element = null; // Создали пустой элемент карточки
 
-  const date = isDateShowing ? `${dueDate.getDate()} ${MONTH_NAMES[dueDate.getMonth()]}` : ``;
-  const time = isDateShowing ? formatTime(dueDate) : ``;
+    this._description = task.description;
+    this._color = task.color;
+    this._dueDate = task.dueDate;
+    this._repeatingDays = task.repeatingDays;
+    this._isArchive = task.isArchive;
+    this._isFavorite = task.isFavorite;
+  }
 
-  const repeatClass = Object.values(repeatingDays).some(Boolean) ? `card--repeat` : ``;
-  const deadlineClass = isExpired ? `card--deadline` : ``;
-  const archiveButtonInactiveClass = isArchive ? `` : `card__btn--disabled`;
-  const favoriteButtonInactiveClass = isFavorite ? `` : `card__btn--disabled`;
 
-  return `<article class="card card--${color} ${repeatClass} ${deadlineClass}">
+  getTemplate() {
+    const isExpired = this._dueDate instanceof Date && this._dueDate < Date.now();
+    const isDateShowing = !!this._dueDate;
+
+    const date = isDateShowing ? `${this._dueDate.getDate()} ${MONTH_NAMES[this._dueDate.getMonth()]}` : ``;
+    const time = isDateShowing ? formatTime(this._dueDate) : ``;
+
+    const repeatClass = Object.values(this._repeatingDays).some(Boolean) ? `card--repeat` : ``;
+    const deadlineClass = isExpired ? `card--deadline` : ``;
+    const archiveButtonInactiveClass = this._isArchive ? `` : `card__btn--disabled`;
+    const favoriteButtonInactiveClass = this._isFavorite ? `` : `card__btn--disabled`;
+
+    return `<article class="card card--${this._color} ${repeatClass} ${deadlineClass}">
     <div class="card__form">
       <div class="card__inner">
         <div class="card__control">
@@ -41,7 +52,7 @@ export const createTaskTemplate = (task) => {
         </div>
 
         <div class="card__textarea-wrap">
-          <p class="card__text">${description}</p>
+          <p class="card__text">${this._description}</p>
         </div>
 
         <div class="card__settings">
@@ -59,4 +70,18 @@ export const createTaskTemplate = (task) => {
       </div>
     </div>
   </article>`;
-};
+  }
+
+  getElement() {
+    if (!this._element) { // Если элемента нет, создаем его
+      this._element = createElement(this.getTemplate()); // Создает DOM_элемент на основе сгенерир строки(разметки)
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null; // Отчищает ресурс, удаляет ссылку на созданный DOM-элемент
+  }
+
+}

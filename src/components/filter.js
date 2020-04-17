@@ -1,30 +1,30 @@
-// Создание 1 блока фильтра
-const createFilterMarkup = (filter, isChecked) => {
-  const {name, count} = filter; // Собираем отдельные параметры в объект и исп деструктуризацию,
-  // чтобы каждый раз не обращаться filter.name...
+import {createElement} from "../util";
+import FilterMarkupComponent from "./filter-markup";
 
-  return (
-    `<input
-      type="radio"
-      id="filter__${name}"
-      class="filter__input visually-hidden"
-      name="filter"
-      ${isChecked ? `checked` : ``}
-    />
-    <label for="filter__${name}" class="filter__label">
-      ${name} <span class="filter__${name}-count">${count}</span></label
-    >`
-  );
-};
+export default class FilterCopmonent {
+  constructor(filters) {
+    this._filters = filters;
+    this._element = null;
+  }
 
+  getTemplate() {
+    const filterMarkup = this._filters.map((filter, i) => new FilterMarkupComponent(filter, i === 0).getTemplate()).join(`\n`);
+    return `<section class="main__filter filter container">
+              ${filterMarkup}
+            </section>`;
+  }
 
-// Ф генерации блока фильтров
-export const createFilterTemplate = (filters) => {
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
 
-  const filterMarkup = filters.map((it, i) => createFilterMarkup(it, i === 0)).join(`\n`);
+    return this._element;
+  }
 
-  return `<section class="main__filter filter container">
-    ${filterMarkup}
-  </section>`;
-};
+  removeElement() {
+    this._element = null;
+  }
+}
+
 
