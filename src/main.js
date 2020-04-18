@@ -6,13 +6,18 @@ import TaskEditCopmonent from "./components/task-edit";
 import TaskCopmonent from "./components/task";
 import LoadMoreButtonCopmonent from "./components/load-more-button";
 import TasksCopmonent from "./components/tasks";
+import NoTasks from "./components/no-tasks";
 import {generateFilters} from "./mock/filter";
 import {generateTasks} from "./mock/task";
 import {renderPosition, render} from "./util";
 
+let activeCard = null;
+let activeCardEditForm = null;
+
 const TASK_COUNT = 22;
 const SHOWING_TASKS_COUNT_ON_START = 8;
 const SHOWING_TASKS_COUNT_BY_BUTTON = 8;
+
 
 // Логика отрисовка 1 карточки
 const renderTask = (taskElement, task) => {
@@ -22,17 +27,48 @@ const renderTask = (taskElement, task) => {
   const editButton = taskComponent.getElement().querySelector(`.card__btn--edit`);
   const editForm = taskEditComponent.getElement().querySelector(`form`);
 
-  const onEditButtonClick = () => { // Заменяем карточку на форму редактирование
-    taskElement.replaceChild(taskEditComponent.getElement(), taskComponent.getElement()); // по клику на кнопку Edit в карточке
+  const card = taskComponent.getElement();
+  const cardEditForm = taskEditComponent.getElement();
+
+  const replaceTaskToEdit = () => { // Заменяем карточку на форму редактирование
+    document.addEventListener(`keydown`, onEscKeyDown);
+
+    if (activeCardEditForm) {
+      replaceEditToTask();
+    }
+
+    taskElement.replaceChild(cardEditForm, card);
+    activeCard = card;
+    activeCardEditForm = cardEditForm;
+
   };
 
-  const onEditFormSubmit = (evt) => { // Заменяем форму редактирования на карточку
+  const replaceEditToTask = () => { // Заменяем форму редактирования на карточку
+    document.removeEventListener(`keydown`, onEscKeyDown);
+
+    if (activeCard && activeCardEditForm) {
+      taskElement.replaceChild(activeCard, activeCardEditForm);
+      activeCard = null;
+      activeCardEditForm = null;
+    }
+  };
+
+  const onEscKeyDown = (evt) => {
+    const isEscKey = evt.key === `Escape` || evt.key === `Esc`;
+
+    if (isEscKey) {
+      replaceEditToTask();
+    }
+  };
+
+  editButton.addEventListener(`click`, () => {
+    replaceTaskToEdit();
+  });
+
+  editForm.addEventListener(`submit`, (evt) => {
     evt.preventDefault();
-    taskElement.replaceChild(taskComponent.getElement(), taskEditComponent.getElement());
-  };
-
-  editButton.addEventListener(`click`, onEditButtonClick);
-  editForm.addEventListener(`submit`, onEditFormSubmit);
+    replaceEditToTask();
+  });
 
   render(taskElement, taskComponent.getElement(), renderPosition.BEFOREEND); // Отрисовываем карточку
 
@@ -41,6 +77,12 @@ const renderTask = (taskElement, task) => {
 
 // Логика отрисовки всего, что внутри Boad Container
 const renderBoard = (boardComponent, tasksData) => {
+  const isAllTasksArchived = tasksData.every((task) => task.isArchive); // Проверяем, все ли задачи в архиве
+
+  if (isAllTasksArchived) {
+    render(boardComponent.getElement(), new NoTasks().getElement(), renderPosition.BEFOREEND);
+    return;
+  }
 
   render(boardComponent.getElement(), new SortCopmonent().getElement(), renderPosition.BEFOREEND);
   render(boardComponent.getElement(), new TasksCopmonent().getElement(), renderPosition.BEFOREEND);
