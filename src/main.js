@@ -11,9 +11,13 @@ import {generateFilters} from "./mock/filter";
 import {generateTasks} from "./mock/task";
 import {renderPosition, render} from "./util";
 
+let activeCard = null;
+let activeCardEditForm = null;
+
 const TASK_COUNT = 22;
 const SHOWING_TASKS_COUNT_ON_START = 8;
 const SHOWING_TASKS_COUNT_BY_BUTTON = 8;
+
 
 // Логика отрисовка 1 карточки
 const renderTask = (taskElement, task) => {
@@ -23,12 +27,30 @@ const renderTask = (taskElement, task) => {
   const editButton = taskComponent.getElement().querySelector(`.card__btn--edit`);
   const editForm = taskEditComponent.getElement().querySelector(`form`);
 
+  const card = taskComponent.getElement();
+  const cardEditForm = taskEditComponent.getElement();
+
   const replaceTaskToEdit = () => { // Заменяем карточку на форму редактирование
-    taskElement.replaceChild(taskEditComponent.getElement(), taskComponent.getElement()); // по клику на кнопку Edit в карточке
+    document.addEventListener(`keydown`, onEscKeyDown);
+
+    if (activeCardEditForm) {
+      replaceEditToTask();
+    }
+
+    taskElement.replaceChild(cardEditForm, card);
+    activeCard = card;
+    activeCardEditForm = cardEditForm;
+
   };
 
   const replaceEditToTask = () => { // Заменяем форму редактирования на карточку
-    taskElement.replaceChild(taskComponent.getElement(), taskEditComponent.getElement());
+    document.removeEventListener(`keydown`, onEscKeyDown);
+
+    if (activeCard && activeCardEditForm) {
+      taskElement.replaceChild(activeCard, activeCardEditForm);
+      activeCard = null;
+      activeCardEditForm = null;
+    }
   };
 
   const onEscKeyDown = (evt) => {
@@ -36,19 +58,16 @@ const renderTask = (taskElement, task) => {
 
     if (isEscKey) {
       replaceEditToTask();
-      document.removeEventListener(`keydown`, onEscKeyDown);
     }
   };
 
   editButton.addEventListener(`click`, () => {
     replaceTaskToEdit();
-    document.addEventListener(`keydown`, onEscKeyDown);
   });
 
   editForm.addEventListener(`submit`, (evt) => {
     evt.preventDefault();
     replaceEditToTask();
-    document.removeEventListener(`keydown`, onEscKeyDown);
   });
 
   render(taskElement, taskComponent.getElement(), renderPosition.BEFOREEND); // Отрисовываем карточку
