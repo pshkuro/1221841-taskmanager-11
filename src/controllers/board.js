@@ -70,50 +70,50 @@ const renderTask = (taskElement, task) => {
 
 
 // Логика отрисовки всего, что внутри Boad Container
-const renderBoard = (boardComponent, tasksData) => {
-  const isAllTasksArchived = tasksData.every((task) => task.isArchive); // Проверяем, все ли задачи в архиве
+export default class BoardController {
+  constructor(container) {
+    this._container = container;
 
-  if (isAllTasksArchived) {
-    render(boardComponent.getElement(), new NoTasks(), renderPosition.BEFOREEND);
-    return;
+    this._noTasksComponent = new NoTasks();
+    this._sortComponent = new SortCopmonent();
+    this._tasksComponent = new TasksCopmonent();
+    this._loadMoreButtonComponent = new LoadMoreButtonCopmonent();
   }
 
-  render(boardComponent.getElement(), new SortCopmonent(), renderPosition.BEFOREEND);
-  render(boardComponent.getElement(), new TasksCopmonent(), renderPosition.BEFOREEND);
+  render(tasksData) {
+    const container = this._container.getElement();
+    const isAllTasksArchived = tasksData.every((task) => task.isArchive); // Проверяем, все ли задачи в архиве
+
+    if (isAllTasksArchived) {
+      render(container, this._noTasksComponent, renderPosition.BEFOREEND);
+      return;
+    }
+
+    render(container, this._sortComponent, renderPosition.BEFOREEND);
+    render(container, this._tasksComponent, renderPosition.BEFOREEND);
 
 
-  // Отрисовываем наши карточки
-  const taskListElement = boardComponent.getElement().querySelector(`.board__tasks`);
-  let showingTasksCount = SHOWING_TASKS_COUNT_ON_START;
-  tasksData.slice(0, showingTasksCount)
+    // Отрисовываем наши карточки
+    const taskListElement = this._tasksComponent.getElement();
+    let showingTasksCount = SHOWING_TASKS_COUNT_ON_START;
+    tasksData.slice(0, showingTasksCount)
     .forEach((task) => {
       renderTask(taskListElement, task);
     });
 
-  // Логика кнопки LoadMoreButton
-  const loadMoreButtonCopmonent = new LoadMoreButtonCopmonent();
-  render(boardComponent.getElement(), loadMoreButtonCopmonent, renderPosition.BEFOREEND); // Отрисовка кнопки
+    // Логика кнопки LoadMoreButton
+    render(container, this._loadMoreButtonComponent, renderPosition.BEFOREEND); // Отрисовываем кнопу
 
-  loadMoreButtonCopmonent.setClickHandler(function () { // По щелчку подгружаем еще карточки
-    const prevTasksCount = showingTasksCount;
-    showingTasksCount = showingTasksCount + SHOWING_TASKS_COUNT_BY_BUTTON;
+    this._loadMoreButtonComponent.setClickHandler(() => { // По щелочу подгружаем еще карточки
+      const prevTasksCount = showingTasksCount;
+      showingTasksCount = showingTasksCount + SHOWING_TASKS_COUNT_BY_BUTTON;
 
-    tasksData.slice(prevTasksCount, showingTasksCount)
-    .forEach((task) => renderTask(taskListElement, task));
+      tasksData.slice(prevTasksCount, showingTasksCount)
+        .forEach((task) => renderTask(taskListElement, task));
 
-    if (showingTasksCount >= tasksData.length) {
-      remove(loadMoreButtonCopmonent);
-    }
-  });
-};
-
-
-export default class BoardController {
-  constructor(container) {
-    this._container = container;
-  }
-
-  render(tasks) {
-    renderBoard(this._container, tasks);
+      if (showingTasksCount >= tasksData.length) {
+        remove(this._loadMoreButtonComponent);
+      }
+    });
   }
 }
