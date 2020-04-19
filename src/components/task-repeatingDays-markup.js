@@ -1,9 +1,9 @@
-import {createElement} from "../util";
+import AbstractComponent from "./abstract-component";
 
 // Генерация блока выбора дня недели
-export default class RepeatingDaysMarkupComponent {
+export default class RepeatingDaysMarkupComponent extends AbstractComponent {
   constructor(days, repeatingDays) {
-    this._element = null;
+    super();
     this._days = days;
     this._repeatingDays = repeatingDays;
   }
@@ -25,17 +25,5 @@ export default class RepeatingDaysMarkupComponent {
       >`
       );
     }).join(`\n`);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }

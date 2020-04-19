@@ -1,10 +1,11 @@
 import {MONTH_NAMES} from "../const";
-import {formatTime, createElement} from "../util";
+import {formatTime} from "../util";
+import AbstractComponent from "./abstract-component";
 
-export default class TaskCopmonent {
+export default class TaskCopmonent extends AbstractComponent {
 
   constructor(task) { // В Task передаются данные(объекты) карточек, сейчас моки, потом с сервера
-    this._element = null; // Создали пустой элемент карточки
+    super();
 
     this._description = task.description;
     this._color = task.color;
@@ -71,17 +72,4 @@ export default class TaskCopmonent {
     </div>
   </article>`;
   }
-
-  getElement() {
-    if (!this._element) { // Если элемента нет, создаем его
-      this._element = createElement(this.getTemplate()); // Создает DOM_элемент на основе сгенерир строки(разметки)
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null; // Отчищает ресурс, удаляет ссылку на созданный DOM-элемент
-  }
-
 }

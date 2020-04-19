@@ -1,12 +1,13 @@
 import {DAYS, COLORS, MONTH_NAMES} from "../const";
-import {formatTime, createElement} from "../util";
+import AbstractComponent from "./abstract-component";
+import {formatTime} from "../util";
 import ColorMarkupComponent from "./task-color-markup";
 import RepeatingDaysMarkupComponent from "./task-repeatingDays-markup";
 
 
-export default class TaskEditCopmonent {
+export default class TaskEditCopmonent extends AbstractComponent {
   constructor(task) {
-    this._element = null;
+    super();
 
     this._description = task.description;
     this._color = task.color;
@@ -101,17 +102,5 @@ export default class TaskEditCopmonent {
         </form>
       </article>`
     );
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }

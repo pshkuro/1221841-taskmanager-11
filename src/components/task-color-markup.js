@@ -1,9 +1,9 @@
-import {createElement} from "../util";
+import AbstractComponent from "./abstract-component";
 
 // Генерация блока выбора цвета
-export default class ColorMarkupComponent {
+export default class ColorMarkupComponent extends AbstractComponent {
   constructor(colors, currentColor) {
-    this._element = null;
+    super();
     this._colors = colors;
     this._currentColor = currentColor;
   }
@@ -24,17 +24,5 @@ export default class ColorMarkupComponent {
     >${color}</label
   >`);
     }).join(`\n`);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }
