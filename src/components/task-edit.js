@@ -1,6 +1,6 @@
 import {DAYS, COLORS, MONTH_NAMES} from "../const";
 import AbstractComponent from "./abstract-component";
-import {formatTime} from "../util";
+import {formatTime} from "../utils/common";
 import ColorMarkupComponent from "./task-color-markup";
 import RepeatingDaysMarkupComponent from "./task-repeatingDays-markup";
 

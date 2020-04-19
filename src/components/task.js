@@ -1,5 +1,5 @@
 import {MONTH_NAMES} from "../const";
-import {formatTime} from "../util";
+import {formatTime} from "../utils/common";
 import AbstractComponent from "./abstract-component";
 
 export default class TaskCopmonent extends AbstractComponent {

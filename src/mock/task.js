@@ -1,4 +1,4 @@
-import {getRandomArrayItem, getRandomDate} from "../util";
+import {getRandomArrayItem, getRandomDate} from "../utils/common";
 import {DESCRIPTION_ITEMS, COLORS, DAYS} from "../const";
 
 const DefaultRepeatingDays = {
