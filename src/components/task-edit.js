@@ -103,4 +103,8 @@ export default class TaskEditCopmonent extends AbstractComponent {
       </article>`
     );
   }
+
+  setSabmitHandler(handler) {
+    this.getElement().querySelector(`form`).addEventListener(`submit`, handler);
+  }
 }

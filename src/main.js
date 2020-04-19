@@ -24,11 +24,7 @@ const renderTask = (taskElement, task) => {
 
   const taskComponent = new TaskCopmonent(task);
   const taskEditComponent = new TaskEditCopmonent(task);
-  const editButton = taskComponent.getElement().querySelector(`.card__btn--edit`);
-  const editForm = taskEditComponent.getElement().querySelector(`form`);
 
-  const card = taskComponent;
-  const cardEditForm = taskEditComponent;
 
   const replaceTaskToEdit = () => { // Заменяем карточку на форму редактирование
     document.addEventListener(`keydown`, onEscKeyDown);
@@ -37,9 +33,9 @@ const renderTask = (taskElement, task) => {
       replaceEditToTask();
     }
 
-    replace(cardEditForm, card);
-    activeCard = card;
-    activeCardEditForm = cardEditForm;
+    replace(taskEditComponent, taskComponent);
+    activeCard = taskComponent;
+    activeCardEditForm = taskEditComponent;
 
   };
 
@@ -61,11 +57,11 @@ const renderTask = (taskElement, task) => {
     }
   };
 
-  editButton.addEventListener(`click`, () => {
+  taskComponent.setEditButtonClickHandler(() => {
     replaceTaskToEdit();
   });
 
-  editForm.addEventListener(`submit`, (evt) => {
+  taskEditComponent.setSabmitHandler((evt) => {
     evt.preventDefault();
     replaceEditToTask();
   });
@@ -100,7 +96,7 @@ const renderBoard = (boardComponent, tasksData) => {
   const loadMoreButtonCopmonent = new LoadMoreButtonCopmonent();
   render(boardComponent.getElement(), loadMoreButtonCopmonent, renderPosition.BEFOREEND); // Отрисовка кнопки
 
-  loadMoreButtonCopmonent.getElement().addEventListener(`click`, function () { // По щелчку подгружаем еще карточки
+  loadMoreButtonCopmonent.setClickHandler(function () { // По щелчку подгружаем еще карточки
     const prevTasksCount = showingTasksCount;
     showingTasksCount = showingTasksCount + SHOWING_TASKS_COUNT_BY_BUTTON;
 
