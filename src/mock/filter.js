@@ -1,5 +1,5 @@
 import {FILTER_NAMES} from "../const";
-import {isToday} from "../util";
+import {isToday} from "../utils/common";
 
 const generateFilters = (tasks) => {
 

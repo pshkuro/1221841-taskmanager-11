@@ -1,10 +1,10 @@
-import {createElement} from "../util";
+import AbstractComponent from "./abstract-component";
 import FilterMarkupComponent from "./filter-markup";
 
-export default class FilterCopmonent {
+export default class FilterCopmonent extends AbstractComponent {
   constructor(filters) {
+    super();
     this._filters = filters;
-    this._element = null;
   }
 
   getTemplate() {
@@ -12,18 +12,6 @@ export default class FilterCopmonent {
     return `<section class="main__filter filter container">
               ${filterMarkup}
             </section>`;
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }
 

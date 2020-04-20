@@ -1,9 +1,10 @@
-import {createElement} from "../util";
+import AbstractComponent from "./abstract-component";
 
-export default class FilterMarkupComponent {
+export default class FilterMarkupComponent extends AbstractComponent {
   constructor(filter, isChecked) {
+    super();
     this._isChecked = isChecked;
-    this._element = null;
+
 
     this._name = filter.name;
     this._count = filter.count;
@@ -22,17 +23,5 @@ export default class FilterMarkupComponent {
         ${this._name} <span class="filter__${this._name}-count">${this._count}</span></label
       >`
     );
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }
