@@ -155,7 +155,11 @@ export default class BoardController {
       taskListElement.innerHTML = ``;
 
       renderTasks(taskListElement, sortedTasks);
-      renderLoadMoreButton();
+
+      const showMoreButton = container.querySelector(`.load-more`);
+      if (!showMoreButton) {
+        renderLoadMoreButton();
+      }
 
     });
   }
