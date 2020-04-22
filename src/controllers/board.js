@@ -104,63 +104,65 @@ export default class BoardController {
     this._sortComponent = new SortCopmonent();
     this._tasksComponent = new TasksCopmonent();
     this._loadMoreButtonComponent = new LoadMoreButtonCopmonent();
+    this._showingTasksCount = SHOWING_TASKS_COUNT_ON_START;
+    this._taskListElement = this._tasksComponent.getElement();
+    this._container = this._container.getElement();
+  }
+
+  // Логика кнопки LoadMoreButton
+  renderLoadMoreButton(tasksData) {
+    if (this._showingTasksCount >= tasksData.length) {
+      return;
+    }
+    render(this._container, this._loadMoreButtonComponent, renderPosition.BEFOREEND); // Отрисовываем кнопу
+
+    this._loadMoreButtonComponent.setClickHandler(() => { // По щелочу подгружаем еще карточки
+      const prevTasksCount = this._showingTasksCount;
+      this._showingTasksCount = this._showingTasksCount + SHOWING_TASKS_COUNT_BY_BUTTON;
+
+      const sortedTasks = getSortedTasks(tasksData, this._sortComponent.getSortType(), prevTasksCount, this._showingTasksCount);
+      renderTasks(this._taskListElement, sortedTasks);
+
+      if (this._showingTasksCount >= tasksData.length) {
+        remove(this._loadMoreButtonComponent);
+      }
+    });
+  }
+
+  // Сортировка
+  sortTasks(tasksData) {
+    this._sortComponent.setSortTypeChangeHandler((sortType) => {
+      this._showingTasksCount = SHOWING_TASKS_COUNT_BY_BUTTON;
+
+      const sortedTasks = getSortedTasks(tasksData, sortType, 0, this._showingTasksCount);
+      this._taskListElement.innerHTML = ``;
+
+      renderTasks(this._taskListElement, sortedTasks);
+
+      const showMoreButton = this._container.querySelector(`.load-more`);
+      if (!showMoreButton) {
+        this.renderLoadMoreButton(tasksData);
+      }
+    });
   }
 
   render(tasksData) {
-
-    // Логика кнопки LoadMoreButton
-    const renderLoadMoreButton = () => {
-      if (showingTasksCount >= tasksData.length) {
-        return;
-      }
-      render(container, this._loadMoreButtonComponent, renderPosition.BEFOREEND); // Отрисовываем кнопу
-
-      this._loadMoreButtonComponent.setClickHandler(() => { // По щелочу подгружаем еще карточки
-        const prevTasksCount = showingTasksCount;
-        showingTasksCount = showingTasksCount + SHOWING_TASKS_COUNT_BY_BUTTON;
-
-        const sortedTasks = getSortedTasks(tasksData, this._sortComponent.getSortType(), prevTasksCount, showingTasksCount);
-        renderTasks(taskListElement, sortedTasks);
-
-        if (showingTasksCount >= tasksData.length) {
-          remove(this._loadMoreButtonComponent);
-        }
-      });
-    };
-
-    const container = this._container.getElement();
     const isAllTasksArchived = tasksData.every((task) => task.isArchive); // Проверяем, все ли задачи в архиве
 
     if (isAllTasksArchived) {
-      render(container, this._noTasksComponent, renderPosition.BEFOREEND);
+      render(this._container, this._noTasksComponent, renderPosition.BEFOREEND);
       return;
     }
 
-    render(container, this._sortComponent, renderPosition.BEFOREEND);
-    render(container, this._tasksComponent, renderPosition.BEFOREEND);
+    render(this._container, this._sortComponent, renderPosition.BEFOREEND);
+    render(this._container, this._tasksComponent, renderPosition.BEFOREEND);
 
 
     // Отрисовываем наши карточки
-    const taskListElement = this._tasksComponent.getElement();
-    let showingTasksCount = SHOWING_TASKS_COUNT_ON_START;
-
-    renderTasks(taskListElement, tasksData.slice(0, showingTasksCount));
-    renderLoadMoreButton();
+    renderTasks(this._taskListElement, tasksData.slice(0, this._showingTasksCount));
+    this.renderLoadMoreButton(tasksData);
 
     // Сортировка
-    this._sortComponent.setSortTypeChangeHandler((sortType) => {
-      showingTasksCount = SHOWING_TASKS_COUNT_BY_BUTTON;
-
-      const sortedTasks = getSortedTasks(tasksData, sortType, 0, showingTasksCount);
-      taskListElement.innerHTML = ``;
-
-      renderTasks(taskListElement, sortedTasks);
-
-      const showMoreButton = container.querySelector(`.load-more`);
-      if (!showMoreButton) {
-        renderLoadMoreButton();
-      }
-
-    });
+    this.sortTasks(tasksData);
   }
 }
