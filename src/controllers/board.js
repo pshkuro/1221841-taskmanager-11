@@ -2,7 +2,7 @@
 // добавлять их на страницу, навешивать обработчики.
 // То есть реализовывать бизнес-логику и поведение приложения.
 
-import SortCopmonent from "../components/sorting";
+import SortCopmonent, {SortType} from "../components/sorting";
 import TaskEditCopmonent from "../components/task-edit";
 import TaskCopmonent from "../components/task";
 import LoadMoreButtonCopmonent from "../components/load-more-button";
@@ -68,52 +68,100 @@ const renderTask = (taskElement, task) => {
 
 };
 
+const renderTasks = (taskListElement, tasks) => {
+  tasks.forEach((task) => {
+    renderTask(taskListElement, task);
+  });
+};
+
+// Возвращаем отсорт карточки в зав-ти от типа сортировки
+const getSortedTasks = (tasks, sortType, from, to) => {
+  let sortedTasks = [];
+  const showingTasks = tasks.slice();
+
+  switch (sortType) {
+    case SortType.DATE_UP:
+      sortedTasks = showingTasks.sort((a, b) => a.dueDate - b.dueDate);
+      break;
+    case SortType.DATE_DOWN:
+      sortedTasks = showingTasks.sort((a, b) => b.dueDate - a.dueDate);
+      break;
+    case SortType.DEFAULT:
+      sortedTasks = showingTasks;
+      break;
+  }
+
+  return sortedTasks.slice(from, to);
+};
+
 
 // Логика отрисовки всего, что внутри Boad Container
 export default class BoardController {
   constructor(container) {
-    this._container = container;
+    this._container = container.getElement();
 
     this._noTasksComponent = new NoTasks();
     this._sortComponent = new SortCopmonent();
     this._tasksComponent = new TasksCopmonent();
     this._loadMoreButtonComponent = new LoadMoreButtonCopmonent();
+    this._showingTasksCount = SHOWING_TASKS_COUNT_ON_START;
+    this._taskListElement = this._tasksComponent.getElement();
   }
 
-  render(tasksData) {
-    const container = this._container.getElement();
-    const isAllTasksArchived = tasksData.every((task) => task.isArchive); // Проверяем, все ли задачи в архиве
-
-    if (isAllTasksArchived) {
-      render(container, this._noTasksComponent, renderPosition.BEFOREEND);
+  // Логика кнопки LoadMoreButton
+  renderLoadMoreButton(tasksData) {
+    if (this._showingTasksCount >= tasksData.length) {
       return;
     }
-
-    render(container, this._sortComponent, renderPosition.BEFOREEND);
-    render(container, this._tasksComponent, renderPosition.BEFOREEND);
-
-
-    // Отрисовываем наши карточки
-    const taskListElement = this._tasksComponent.getElement();
-    let showingTasksCount = SHOWING_TASKS_COUNT_ON_START;
-    tasksData.slice(0, showingTasksCount)
-    .forEach((task) => {
-      renderTask(taskListElement, task);
-    });
-
-    // Логика кнопки LoadMoreButton
-    render(container, this._loadMoreButtonComponent, renderPosition.BEFOREEND); // Отрисовываем кнопу
+    render(this._container, this._loadMoreButtonComponent, renderPosition.BEFOREEND); // Отрисовываем кнопу
 
     this._loadMoreButtonComponent.setClickHandler(() => { // По щелочу подгружаем еще карточки
-      const prevTasksCount = showingTasksCount;
-      showingTasksCount = showingTasksCount + SHOWING_TASKS_COUNT_BY_BUTTON;
+      const prevTasksCount = this._showingTasksCount;
+      this._showingTasksCount = this._showingTasksCount + SHOWING_TASKS_COUNT_BY_BUTTON;
 
-      tasksData.slice(prevTasksCount, showingTasksCount)
-        .forEach((task) => renderTask(taskListElement, task));
+      const sortedTasks = getSortedTasks(tasksData, this._sortComponent.getSortType(), prevTasksCount, this._showingTasksCount);
+      renderTasks(this._taskListElement, sortedTasks);
 
-      if (showingTasksCount >= tasksData.length) {
+      if (this._showingTasksCount >= tasksData.length) {
         remove(this._loadMoreButtonComponent);
       }
     });
+  }
+
+  // Сортировка
+  sortTasks(tasksData) {
+    this._sortComponent.setSortTypeChangeHandler((sortType) => {
+      this._showingTasksCount = SHOWING_TASKS_COUNT_BY_BUTTON;
+
+      const sortedTasks = getSortedTasks(tasksData, sortType, 0, this._showingTasksCount);
+      this._taskListElement.innerHTML = ``;
+
+      renderTasks(this._taskListElement, sortedTasks);
+
+      const showMoreButton = this._container.querySelector(`.load-more`);
+      if (!showMoreButton) {
+        this.renderLoadMoreButton(tasksData);
+      }
+    });
+  }
+
+  render(tasksData) {
+    const isAllTasksArchived = tasksData.every((task) => task.isArchive); // Проверяем, все ли задачи в архиве
+
+    if (isAllTasksArchived) {
+      render(this._container, this._noTasksComponent, renderPosition.BEFOREEND);
+      return;
+    }
+
+    render(this._container, this._sortComponent, renderPosition.BEFOREEND);
+    render(this._container, this._tasksComponent, renderPosition.BEFOREEND);
+
+
+    // Отрисовываем наши карточки
+    renderTasks(this._taskListElement, tasksData.slice(0, this._showingTasksCount));
+    this.renderLoadMoreButton(tasksData);
+
+    // Сортировка
+    this.sortTasks(tasksData);
   }
 }
