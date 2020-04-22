@@ -98,7 +98,7 @@ const getSortedTasks = (tasks, sortType, from, to) => {
 // Логика отрисовки всего, что внутри Boad Container
 export default class BoardController {
   constructor(container) {
-    this._container = container;
+    this._container = container.getElement();
 
     this._noTasksComponent = new NoTasks();
     this._sortComponent = new SortCopmonent();
@@ -106,7 +106,6 @@ export default class BoardController {
     this._loadMoreButtonComponent = new LoadMoreButtonCopmonent();
     this._showingTasksCount = SHOWING_TASKS_COUNT_ON_START;
     this._taskListElement = this._tasksComponent.getElement();
-    this._container = this._container.getElement();
   }
 
   // Логика кнопки LoadMoreButton
