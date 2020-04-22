@@ -7,8 +7,9 @@ let activeCard = null;
 let activeCardEditForm = null;
 
 export default class TaskController {
-  constructor(container) {
+  constructor(container, onDataChange) {
     this._container = container;
+    this._onDataChange = onDataChange;
 
     this._taskComponent = null; // Чтобы могли получить к ним дооступ, не выызвая render
     this._taskEditComponent = null;
@@ -30,8 +31,25 @@ export default class TaskController {
       this._replaceEditToTask();
     });
 
+    this._taskComponent.setArchiveButtonClickHandler(() => {
+      const newTask = Object.assign({}, task, {
+        isArchive: !task.isArchive,
+      });
+
+      this._onDataChange(this, task, newTask);
+
+      // replace(new TaskCopmonent(newTask), this._taskComponent);
+    });
+
+    this._taskComponent.setFavoriteButtonClickHandler(() => {
+      this._onDataChange(this, task, Object.assign({}, task, {
+        isFavorite: !task.isFavorite,
+      }));
+    });
+
     render(this._container, this._taskComponent, renderPosition.BEFOREEND); // Отрисовываем карточку
   }
+
 
   _replaceTaskToEdit() { // Заменяем карточку на форму редактирование
     document.addEventListener(`keydown`, this._onEscKeyDown);
@@ -57,10 +75,11 @@ export default class TaskController {
   }
 
   _onEscKeyDown(evt) {
-    this._isEscKey = evt.key === `Escape` || evt.key === `Esc`;
+    const isEscKey = evt.key === `Escape` || evt.key === `Esc`;
 
-    if (this._isEscKey) {
+    if (isEscKey) {
       this._replaceEditToTask();
     }
   }
+
 }
