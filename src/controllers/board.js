@@ -15,7 +15,7 @@ const SHOWING_TASKS_COUNT_BY_BUTTON = 8;
 
 const renderTasks = (taskListElement, tasks, onDataChange, onViewChange) => {
   return tasks.map((task) => {
-    const taskController = new TaskController(taskListElement, onDataChange, onViewChange);
+    const taskController = new TaskController(taskListElement, onDataChange, onViewChange); // подписываем под-ков на сообщение
     taskController.render(task);
 
     return taskController;
@@ -49,6 +49,7 @@ export default class BoardController {
   constructor(container) {
     this._container = container.getElement();
     this._tasks = [];
+    // `подписчики`
     this._showedTaskControllers = []; // Все карточки задач, чтобы иметь доступ ко всем карточкам
 
     this._noTasksComponent = new NoTasks();
@@ -143,6 +144,7 @@ export default class BoardController {
     taskController.render(this._tasks[index]);
   }
 
+  // `уведомляем подписчиков о сообщении`
   _onViewChange() {
     this._showedTaskControllers.forEach((task) => task.setDeafultView());
   }

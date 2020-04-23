@@ -43,7 +43,7 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
     super.rerender();
   }
 
-  // Сброс измененных данных, если форма редактирования прсто закрыта, а не сохранена
+  // Сброс измененных данных, если форма редактирования просто закрыта, а не сохранена
   reset() {
     this._isDateShowing = Boolean(this._dueDate); // Проверка, приходит ли такой объект, или нет (true/false)
     this._isRepeatingTask = Object.values(this._repeatingDays).some((a) => a);

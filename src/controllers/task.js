@@ -3,6 +3,8 @@ import TaskEditCopmonent from "../components/task-edit";
 import TaskCopmonent from "../components/task";
 import {renderPosition, render, replace} from "../utils/render";
 
+
+// Флаги в каком состоянии находится карточка в обычнои или редактрирования
 const Mode = {
   DEFAULT: `default`,
   EDIT: `edit`,
@@ -10,7 +12,7 @@ const Mode = {
 
 
 export default class TaskController {
-  constructor(container, onDataChange, onViewChange) {
+  constructor(container, onDataChange, onViewChange) { // В этом модуле подписчик решает что делать с сообщ
     this._container = container;
     this._onDataChange = onDataChange;
     this._onViewChange = onViewChange;
@@ -59,7 +61,7 @@ export default class TaskController {
     }
   }
 
-  // Отображения задачи вместо формы редактирования
+  // Отображения задачи вместо формы редактирования - вызывается внутри _onViewChange()
   setDefaultView() {
     if (this._mode !== Mode.DEFAULT) {
       this._replaceEditToTask();
@@ -68,10 +70,9 @@ export default class TaskController {
 
 
   _replaceTaskToEdit() { // Заменяем карточку на форму редактирование
-    this._onViewChange();
+    this._onViewChange(); // Реализуем сообщение, что все формы, открытые до этого, должны закрыться
     replace(this._taskEditComponent, this._taskComponent);
     this._mode = Mode.EDIT;
-
   }
 
   _replaceEditToTask() { // Заменяем форму редактирования на карточку
