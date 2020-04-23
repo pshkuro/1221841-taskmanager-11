@@ -13,9 +13,9 @@ import TaskController from "../controllers/task";
 const SHOWING_TASKS_COUNT_ON_START = 8;
 const SHOWING_TASKS_COUNT_BY_BUTTON = 8;
 
-const renderTasks = (taskListElement, tasks, onDataChange) => {
+const renderTasks = (taskListElement, tasks, onDataChange, onViewChange) => {
   return tasks.map((task) => {
-    const taskController = new TaskController(taskListElement, onDataChange);
+    const taskController = new TaskController(taskListElement, onDataChange, onViewChange);
     taskController.render(task);
 
     return taskController;
@@ -59,6 +59,7 @@ export default class BoardController {
     this._taskListElement = this._tasksComponent.getElement();
 
     this._onDataChange = this._onDataChange.bind(this);
+    this._onViewChange = this._onDataChange.bind(this);
     this._sortTasks = this._sortTasks.bind(this);
     this._sortComponent.setSortTypeChangeHandler(this._sortTasks);
 
@@ -78,7 +79,8 @@ export default class BoardController {
 
 
     // Отрисовываем наши карточки
-    const newTasks = renderTasks(this._taskListElement, this._tasks.slice(0, this._showingTasksCount), this._onDataChange);
+    const newTasks = renderTasks(this._taskListElement, this._tasks.slice(0, this._showingTasksCount),
+        this._onDataChange, this._onViewChange);
     this._showedTaskControllers = this._showedTaskControllers.concat(newTasks);
 
 
@@ -98,7 +100,7 @@ export default class BoardController {
       this._showingTasksCount = this._showingTasksCount + SHOWING_TASKS_COUNT_BY_BUTTON;
 
       const sortedTasks = getSortedTasks(this._tasks, this._sortComponent.getSortType(), prevTasksCount, this._showingTasksCount);
-      const newTasks = renderTasks(this._taskListElement, sortedTasks, this._onDataChange);
+      const newTasks = renderTasks(this._taskListElement, sortedTasks, this._onDataChange, this._onViewChange);
 
       this._showedTaskControllers = this._showedTaskControllers.concat(newTasks);
 
@@ -115,7 +117,7 @@ export default class BoardController {
     const sortedTasks = getSortedTasks(this._tasks, sortType, 0, this._showingTasksCount);
     this._taskListElement.innerHTML = ``;
 
-    const newTasks = renderTasks(this._taskListElement, sortedTasks, this._onDataChange);
+    const newTasks = renderTasks(this._taskListElement, sortedTasks, this._onDataChange, this._onViewChange);
     this._showedTaskControllers = newTasks;
 
     const showMoreButton = this._container.querySelector(`.load-more`);
@@ -124,6 +126,7 @@ export default class BoardController {
     }
   }
 
+  // То, что вызывает, находится в board, а то, что происходит в task
   _onDataChange(taskController, oldData, newData) {
     // Находит элемент, по которому произошел клик
     const index = this._tasks.findIndex((it) => it === oldData);
@@ -138,6 +141,10 @@ export default class BoardController {
 
     // Рендерим new задачу
     taskController.render(this._tasks[index]);
+  }
+
+  _onViewChange() {
+    this._showedTaskControllers.forEach((task) => task.setDeafultView());
   }
 
 

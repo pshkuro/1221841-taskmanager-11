@@ -12,6 +12,7 @@ const isRepeating = (repeatingDays) => {
 export default class TaskEditCopmonent extends AbstractSmartComponent {
   constructor(task) {
     super();
+    this._task = task;
 
     this._description = task.description;
     this._color = task.color;
@@ -42,13 +43,19 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
     super.rerender();
   }
 
+  // Сброс измененных данных, если форма редактирования прсто закрыта, а не сохранена
+  reset() {
+    this._isDateShowing = Boolean(this._dueDate); // Проверка, приходит ли такой объект, или нет (true/false)
+    this._isRepeatingTask = Object.values(this._repeatingDays).some((a) => a);
+    this._activeRepeatingDays = Object.assign({}, this._repeatingDays);
+
+    this.rerender();
+  }
+
   getTemplate() {
     // Флаг, что задача просрочена
     // (создан ли dueDate с пом-ю конструктора Date (мб придет объект другого типа, тогда = null и авто задача Expired)
     const isExpired = this._dueDate instanceof Date && this._dueDate < Date.now();
-    // кнопку «Save» необходимо блокировать, если поля показаны, а дата или дни повторения не выбраны
-    const isBlockSaveButton = (this._isDateShowing && this._isRepeatingTask) ||
-    (this._isRepeatingTask && !isRepeating(this._activeRepeatingDays));
 
     const date = (this._isDateShowing && this._dueDate) ? `${this._dueDate.getDate()} ${MONTH_NAMES[this._dueDate.getMonth()]}` : ``;
     const time = (this._isDateShowing && this._dueDate) ? formatTime(this._dueDate) : ``;
@@ -58,6 +65,9 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
 
     const colorsMarkup = new ColorMarkupComponent(COLORS, this._color).getTemplate();
     const repeatingDaysMarkup = new RepeatingDaysMarkupComponent(DAYS, this._activeRepeatingDays).getTemplate();
+
+    // кнопку «Save» необходимо блокировать, если поля показаны, а дата или дни повторения не выбраны
+    const isBlockSaveButton = (date && isRepeating(this._activeRepeatingDays));
 
     return (
       `<article class="card card--edit card--${this._color} ${classRepeat} ${classDeadline}">
@@ -120,7 +130,7 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
             </div>
   
             <div class="card__status-btns">
-              <button class="card__save" type="submit" ${isBlockSaveButton ? `disabled` : ``}>save</button>
+              <button class="card__save" type="submit"${isBlockSaveButton ? `` : `disabled`}>save</button>
               <button class="card__delete" type="button">delete</button>
             </div>
           </div>
