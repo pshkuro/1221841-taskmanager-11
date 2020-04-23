@@ -17,7 +17,6 @@ export default class TaskController {
   }
 
   render(task) {
-
     this._taskComponent = new TaskCopmonent(task);
     this._taskEditComponent = new TaskEditCopmonent(task);
 
@@ -37,8 +36,6 @@ export default class TaskController {
       });
 
       this._onDataChange(this, task, newTask);
-
-      // replace(new TaskCopmonent(newTask), this._taskComponent);
     });
 
     this._taskComponent.setFavoriteButtonClickHandler(() => {
