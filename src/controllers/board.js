@@ -60,7 +60,7 @@ export default class BoardController {
     this._taskListElement = this._tasksComponent.getElement();
 
     this._onDataChange = this._onDataChange.bind(this);
-    this._onViewChange = this._onDataChange.bind(this);
+    this._onViewChange = this._onViewChange.bind(this);
     this._sortTasks = this._sortTasks.bind(this);
     this._sortComponent.setSortTypeChangeHandler(this._sortTasks);
 
@@ -146,7 +146,7 @@ export default class BoardController {
 
   // `уведомляем подписчиков о сообщении`
   _onViewChange() {
-    this._showedTaskControllers.forEach((task) => task.setDeafultView());
+    this._showedTaskControllers.forEach((task) => task.setDefaultView());
   }
 
 
