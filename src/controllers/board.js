@@ -3,76 +3,25 @@
 // То есть реализовывать бизнес-логику и поведение приложения.
 
 import SortCopmonent, {SortType} from "../components/sorting";
-import TaskEditCopmonent from "../components/task-edit";
-import TaskCopmonent from "../components/task";
 import LoadMoreButtonCopmonent from "../components/load-more-button";
 import TasksCopmonent from "../components/tasks";
 import NoTasks from "../components/no-tasks";
-import {renderPosition, render, replace, remove} from "../utils/render";
-
-let activeCard = null;
-let activeCardEditForm = null;
+import {renderPosition, render, remove} from "../utils/render";
+import TaskController from "../controllers/task";
 
 
 const SHOWING_TASKS_COUNT_ON_START = 8;
 const SHOWING_TASKS_COUNT_BY_BUTTON = 8;
 
-// Логика отрисовка 1 карточки
-const renderTask = (taskElement, task) => {
+const renderTasks = (taskListElement, tasks, onDataChange, onViewChange) => {
+  return tasks.map((task) => {
+    const taskController = new TaskController(taskListElement, onDataChange, onViewChange); // подписываем под-ков на сообщение
+    taskController.render(task);
 
-  const taskComponent = new TaskCopmonent(task);
-  const taskEditComponent = new TaskEditCopmonent(task);
-
-
-  const replaceTaskToEdit = () => { // Заменяем карточку на форму редактирование
-    document.addEventListener(`keydown`, onEscKeyDown);
-
-    if (activeCardEditForm) {
-      replaceEditToTask();
-    }
-
-    replace(taskEditComponent, taskComponent);
-    activeCard = taskComponent;
-    activeCardEditForm = taskEditComponent;
-
-  };
-
-  const replaceEditToTask = () => { // Заменяем форму редактирования на карточку
-    document.removeEventListener(`keydown`, onEscKeyDown);
-
-    if (activeCard && activeCardEditForm) {
-      replace(activeCard, activeCardEditForm);
-      activeCard = null;
-      activeCardEditForm = null;
-    }
-  };
-
-  const onEscKeyDown = (evt) => {
-    const isEscKey = evt.key === `Escape` || evt.key === `Esc`;
-
-    if (isEscKey) {
-      replaceEditToTask();
-    }
-  };
-
-  taskComponent.setEditButtonClickHandler(() => {
-    replaceTaskToEdit();
-  });
-
-  taskEditComponent.setSabmitHandler((evt) => {
-    evt.preventDefault();
-    replaceEditToTask();
-  });
-
-  render(taskElement, taskComponent, renderPosition.BEFOREEND); // Отрисовываем карточку
-
-};
-
-const renderTasks = (taskListElement, tasks) => {
-  tasks.forEach((task) => {
-    renderTask(taskListElement, task);
+    return taskController;
   });
 };
+
 
 // Возвращаем отсорт карточки в зав-ти от типа сортировки
 const getSortedTasks = (tasks, sortType, from, to) => {
@@ -99,6 +48,9 @@ const getSortedTasks = (tasks, sortType, from, to) => {
 export default class BoardController {
   constructor(container) {
     this._container = container.getElement();
+    this._tasks = [];
+    // `подписчики`
+    this._showedTaskControllers = []; // Все карточки задач, чтобы иметь доступ ко всем карточкам
 
     this._noTasksComponent = new NoTasks();
     this._sortComponent = new SortCopmonent();
@@ -106,47 +58,17 @@ export default class BoardController {
     this._loadMoreButtonComponent = new LoadMoreButtonCopmonent();
     this._showingTasksCount = SHOWING_TASKS_COUNT_ON_START;
     this._taskListElement = this._tasksComponent.getElement();
-  }
 
-  // Логика кнопки LoadMoreButton
-  renderLoadMoreButton(tasksData) {
-    if (this._showingTasksCount >= tasksData.length) {
-      return;
-    }
-    render(this._container, this._loadMoreButtonComponent, renderPosition.BEFOREEND); // Отрисовываем кнопу
+    this._onDataChange = this._onDataChange.bind(this);
+    this._onViewChange = this._onViewChange.bind(this);
+    this._sortTasks = this._sortTasks.bind(this);
+    this._sortComponent.setSortTypeChangeHandler(this._sortTasks);
 
-    this._loadMoreButtonComponent.setClickHandler(() => { // По щелочу подгружаем еще карточки
-      const prevTasksCount = this._showingTasksCount;
-      this._showingTasksCount = this._showingTasksCount + SHOWING_TASKS_COUNT_BY_BUTTON;
-
-      const sortedTasks = getSortedTasks(tasksData, this._sortComponent.getSortType(), prevTasksCount, this._showingTasksCount);
-      renderTasks(this._taskListElement, sortedTasks);
-
-      if (this._showingTasksCount >= tasksData.length) {
-        remove(this._loadMoreButtonComponent);
-      }
-    });
-  }
-
-  // Сортировка
-  sortTasks(tasksData) {
-    this._sortComponent.setSortTypeChangeHandler((sortType) => {
-      this._showingTasksCount = SHOWING_TASKS_COUNT_BY_BUTTON;
-
-      const sortedTasks = getSortedTasks(tasksData, sortType, 0, this._showingTasksCount);
-      this._taskListElement.innerHTML = ``;
-
-      renderTasks(this._taskListElement, sortedTasks);
-
-      const showMoreButton = this._container.querySelector(`.load-more`);
-      if (!showMoreButton) {
-        this.renderLoadMoreButton(tasksData);
-      }
-    });
   }
 
   render(tasksData) {
-    const isAllTasksArchived = tasksData.every((task) => task.isArchive); // Проверяем, все ли задачи в архиве
+    this._tasks = tasksData;
+    const isAllTasksArchived = this._tasks.every((task) => task.isArchive); // Проверяем, все ли задачи в архиве
 
     if (isAllTasksArchived) {
       render(this._container, this._noTasksComponent, renderPosition.BEFOREEND);
@@ -158,10 +80,74 @@ export default class BoardController {
 
 
     // Отрисовываем наши карточки
-    renderTasks(this._taskListElement, tasksData.slice(0, this._showingTasksCount));
-    this.renderLoadMoreButton(tasksData);
+    const newTasks = renderTasks(this._taskListElement, this._tasks.slice(0, this._showingTasksCount),
+        this._onDataChange, this._onViewChange);
+    this._showedTaskControllers = this._showedTaskControllers.concat(newTasks);
 
-    // Сортировка
-    this.sortTasks(tasksData);
+
+    this._renderLoadMoreButton(this._tasks);
   }
+
+
+  // Логика кнопки LoadMoreButton
+  _renderLoadMoreButton() {
+    if (this._showingTasksCount >= this._tasks.length) {
+      return;
+    }
+    render(this._container, this._loadMoreButtonComponent, renderPosition.BEFOREEND); // Отрисовываем кнопу
+
+    this._loadMoreButtonComponent.setClickHandler(() => { // По щелочу подгружаем еще карточки
+      const prevTasksCount = this._showingTasksCount;
+      this._showingTasksCount = this._showingTasksCount + SHOWING_TASKS_COUNT_BY_BUTTON;
+
+      const sortedTasks = getSortedTasks(this._tasks, this._sortComponent.getSortType(), prevTasksCount, this._showingTasksCount);
+      const newTasks = renderTasks(this._taskListElement, sortedTasks, this._onDataChange, this._onViewChange);
+
+      this._showedTaskControllers = this._showedTaskControllers.concat(newTasks);
+
+      if (this._showingTasksCount >= this._tasks.length) {
+        remove(this._loadMoreButtonComponent);
+      }
+    });
+  }
+
+  // Сортировка
+  _sortTasks(sortType) {
+    this._showingTasksCount = SHOWING_TASKS_COUNT_BY_BUTTON;
+
+    const sortedTasks = getSortedTasks(this._tasks, sortType, 0, this._showingTasksCount);
+    this._taskListElement.innerHTML = ``;
+
+    const newTasks = renderTasks(this._taskListElement, sortedTasks, this._onDataChange, this._onViewChange);
+    this._showedTaskControllers = newTasks;
+
+    const showMoreButton = this._container.querySelector(`.load-more`);
+    if (!showMoreButton) {
+      this._renderLoadMoreButton(this._tasks);
+    }
+  }
+
+  // То, что вызывает, находится в board, а то, что происходит в task
+  _onDataChange(taskController, oldData, newData) {
+    // Находит элемент, по которому произошел клик
+    const index = this._tasks.findIndex((it) => it === oldData);
+
+    if (index === -1) {
+      return;
+    }
+
+    // Обрезаем до той задачи, которую нужно обновить, всталвяем обновленную, вставляем оставшуюся часть
+    // [до] + [old меняем на new] + [после]
+    this._tasks = [].concat(this._tasks.slice(0, index), newData, this._tasks.slice(index + 1));
+
+    // Рендерим new задачу
+    taskController.render(this._tasks[index]);
+  }
+
+  // `уведомляем подписчиков о сообщении`
+  _onViewChange() {
+    this._showedTaskControllers.forEach((task) => task.setDefaultView());
+  }
+
+
 }
