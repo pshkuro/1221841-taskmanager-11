@@ -1,5 +1,4 @@
-import {MONTH_NAMES} from "../const";
-import {formatTime} from "../utils/common";
+import {formatTime, formatDate} from "../utils/common";
 import AbstractComponent from "./abstract-component";
 
 export default class TaskCopmonent extends AbstractComponent {
@@ -20,7 +19,7 @@ export default class TaskCopmonent extends AbstractComponent {
     const isExpired = this._dueDate instanceof Date && this._dueDate < Date.now();
     const isDateShowing = !!this._dueDate;
 
-    const date = isDateShowing ? `${this._dueDate.getDate()} ${MONTH_NAMES[this._dueDate.getMonth()]}` : ``;
+    const date = isDateShowing ? formatDate(this._dueDate) : ``;
     const time = isDateShowing ? formatTime(this._dueDate) : ``;
 
     const repeatClass = Object.values(this._repeatingDays).some(Boolean) ? `card--repeat` : ``;
