@@ -27,6 +27,7 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
     this._isRepeatingTask = Object.values(this._repeatingDays).some((a) => a);
     this._activeRepeatingDays = Object.assign({}, this._repeatingDays);
     this._flatpickr = null;
+    // this._applyFlatpickr(this);
     this._applyFlatpickr();
     this._element = this.getElement();
 
@@ -46,7 +47,6 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
 
   rerender() {
     super.rerender();
-
     this._applyFlatpickr();
   }
 
@@ -164,7 +164,6 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
     this._element.querySelector(`.card__repeat-toggle`)
     .addEventListener(`click`, () => {
       this._isRepeatingTask = !this._isRepeatingTask;
-
       this.rerender();
     });
   }
@@ -194,6 +193,10 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
         altInput: true,
         allowInput: true,
         defaultDate: this._task.dueDate || `today`,
+        // onClose(dataStr) {
+        //   editor._dueDate = new Date(Date.parse(dataStr));
+        //   editor.rerender();
+        // }
       });
     }
   }
