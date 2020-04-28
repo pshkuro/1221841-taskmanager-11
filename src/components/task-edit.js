@@ -27,10 +27,9 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
     // хотя бы 1 эл true из repeatingDays
     this._isRepeatingTask = Object.values(this._repeatingDays).some((a) => a);
     this._activeRepeatingDays = Object.assign({}, this._repeatingDays);
-    this._flatpickr = null;
-    // this._applyFlatpickr(this);
-    this._applyFlatpickr();
     this._element = this.getElement();
+    this._flatpickr = null;
+    this._applyFlatpickr();
 
     this._submitHandler = null;
     this._subscribeOnDeadlineEvent();
@@ -46,6 +45,7 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
     this._subscribeOnRepeatEvent();
     this._subscribeOnRepeatingDaysEvent();
     this._subscribeOnColors();
+    this._applyFlatpickr();
   }
 
   rerender() {
@@ -77,7 +77,7 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
     const repeatingDaysMarkup = new RepeatingDaysMarkupComponent(DAYS, this._activeRepeatingDays).getTemplate();
 
     // кнопку «Save» необходимо блокировать, если поля показаны, а дата или дни повторения не выбраны
-    const isBlockSaveButton = (date && isRepeating(this._activeRepeatingDays));
+    const isBlockSaveButton = (this._date && isRepeating(this._activeRepeatingDays));
 
     return (
       `<article class="card card--edit card--${this._cardColor} ${classRepeat} ${classDeadline}">
@@ -189,7 +189,6 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
       if (colorInput) {
         this._cardColor = colorInput.value;
         this.rerender();
-
       }
     });
   }
@@ -208,11 +207,8 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
         altInput: true,
         allowInput: true,
         defaultDate: this._task.dueDate || `today`,
-        // onClose(dataStr) {
-        //   editor._dueDate = new Date(Date.parse(dataStr));
-        //   editor.rerender();
-        // }
       });
+
     }
   }
 }
