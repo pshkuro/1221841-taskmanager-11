@@ -1,15 +1,24 @@
 // для синхронизации задач между различными частями приложения
 
+import {getTasksByFilter} from "../utils/filters.js";
+import {FilterType} from "../const.js";
+
 export default class TasksModel {
   constructor() {
     this._tasks = [];
+    this._activeFilterType = FilterType.ALL; // текущий выбранный фильтр
 
     this._dataChangeHandlers = []; // Складываем хэндлеры, которые должны реагировать на изменение данных
+    this._filterChangeHandlers = []; // Callbackи на изменение фильтров
   }
 
   // Получение задач
-  getTasks() {
+  getAllTasks() {
     return this._tasks;
+  }
+
+  getTasks() {
+    return getTasksByFilter(this._tasks, this._activeFilterType);
   }
 
   // Добавление задач
@@ -33,9 +42,23 @@ export default class TasksModel {
     return true;
   }
 
-  // Устанавливает callback, который вызывается, когда задача обновилась
+  // Устанавливает callback, который вызывается, когда Задача обновилась
   setDataChangeHandler(handler) {
     this._dataChangeHandlers.push(handler);
+  }
+
+  // Устанавливает callback, который вызывается, когда Фильтр обновился
+  setFilterChangeHandler(handler) {
+    this._filterChangeHandlers.push(handler);
+  }
+
+
+  // Подписка на изменение фильтров
+  // фильтры обновились -> уведомляем всех, кому интересно, что измениля тип фильтра ->
+  // получают новые отфильтрованные задачи getTasks()
+  setFilters(filterType) {
+    this._activeFilterType = filterType;
+    this._callHandlers(this._filterChangeHandlers);
   }
 
   // Вызывает каждый callback, когда задача обновилась

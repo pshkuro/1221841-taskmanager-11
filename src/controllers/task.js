@@ -1,7 +1,7 @@
 // Логика отрисовка 1 карточки
 import TaskEditCopmonent from "../components/task-edit";
 import TaskCopmonent from "../components/task";
-import {renderPosition, render, replace} from "../utils/render";
+import {renderPosition, render, remove, replace} from "../utils/render";
 
 
 // Флаги в каком состоянии находится карточка в обычнои или редактрирования
@@ -66,6 +66,12 @@ export default class TaskController {
     if (this._mode !== Mode.DEFAULT) {
       this._replaceEditToTask();
     }
+  }
+
+  destroy() {
+    remove(this._taskEditComponent);
+    remove(this._taskComponent);
+    document.removeEventListener(`keydown`, this._onEscKeyDown);
   }
 
 

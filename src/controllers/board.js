@@ -63,6 +63,8 @@ export default class BoardController {
     this._onViewChange = this._onViewChange.bind(this);
     this._sortTasks = this._sortTasks.bind(this);
     this._sortComponent.setSortTypeChangeHandler(this._sortTasks);
+    this._onFilterChange = this._onFilterChange.bind(this);
+    this._tasksModel.setFilterChangeHandler(this._onFilterChange); // Устанавливает callback, который вызывается, когда Фильтр обновился
 
   }
 
@@ -80,12 +82,31 @@ export default class BoardController {
 
 
     // Отрисовываем наши карточки
-    const newTasks = renderTasks(this._taskListElement, tasks.slice(0, this._showingTasksCount),
-        this._onDataChange, this._onViewChange);
-    this._showedTaskControllers = this._showedTaskControllers.concat(newTasks);
+    this._renderTasks(tasks.slice(0, this._showingTasksCount));
 
 
     this._renderLoadMoreButton();
+  }
+
+  _renderTasks(tasks) {
+    const taskListElement = this._tasksComponent.getElement();
+
+    const newTasks = renderTasks(taskListElement, tasks, this._onDataChange, this._onViewChange);
+    this._showedTaskControllers = this._showedTaskControllers.concat(newTasks);
+    this._showingTasksCount = this._showedTaskControllers.length;
+  }
+
+  // Метод удаления карточек
+  _removeTasks() {
+    this._showedTaskControllers.forEach((taskController) => taskController.destroy());
+    this._showedTaskControllers = [];
+  }
+
+  // Метод обновления карточек
+  _updateTasks(count) {
+    this._removeTasks(); // удалим все
+    this._renderTasks(this._tasksModel.getTasks().slice(0, count)); // отрисовываем с новыми данными
+    this._renderLoadMoreButton(); // кнопку рендерим
   }
 
 
@@ -102,9 +123,7 @@ export default class BoardController {
       this._showingTasksCount = this._showingTasksCount + SHOWING_TASKS_COUNT_BY_BUTTON;
 
       const sortedTasks = getSortedTasks(tasks, this._sortComponent.getSortType(), prevTasksCount, this._showingTasksCount);
-      const newTasks = renderTasks(this._taskListElement, sortedTasks, this._onDataChange, this._onViewChange);
-
-      this._showedTaskControllers = this._showedTaskControllers.concat(newTasks);
+      this._renderTasks(sortedTasks);
 
       if (this._showingTasksCount >= tasks.length) {
         remove(this._loadMoreButtonComponent);
@@ -117,10 +136,9 @@ export default class BoardController {
     this._showingTasksCount = SHOWING_TASKS_COUNT_BY_BUTTON;
 
     const sortedTasks = getSortedTasks(this._tasksModel.getTasks(), sortType, 0, this._showingTasksCount);
-    this._taskListElement.innerHTML = ``;
 
-    const newTasks = renderTasks(this._taskListElement, sortedTasks, this._onDataChange, this._onViewChange);
-    this._showedTaskControllers = newTasks;
+    this._removeTasks();
+    this._renderTasks(sortedTasks);
 
     const showMoreButton = this._container.querySelector(`.load-more`);
     if (!showMoreButton) {
@@ -142,5 +160,8 @@ export default class BoardController {
     this._showedTaskControllers.forEach((task) => task.setDefaultView());
   }
 
+  _onFilterChange() {
+    this._updateTasks(SHOWING_TASKS_COUNT_ON_START);
+  }
 
 }

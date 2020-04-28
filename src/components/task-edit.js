@@ -1,16 +1,11 @@
 import {DAYS, COLORS} from "../const";
 import AbstractSmartComponent from "./abstract-smart-component";
-import {formatTime, formatDate} from "../utils/common";
+import {formatTime, formatDate, isRepeating, isOverdueDate} from "../utils/common";
 import ColorMarkupComponent from "./task-color-markup";
 import RepeatingDaysMarkupComponent from "./task-repeatingDays-markup";
 import flatpickr from "flatpickr";
 
 import "flatpickr/dist/flatpickr.min.css"; // Импорт как css файл
-
-const isRepeating = (repeatingDays) => {
-  return Object.values(repeatingDays).some((a) => a);
-};
-
 
 export default class TaskEditCopmonent extends AbstractSmartComponent {
   constructor(task) {
@@ -65,7 +60,7 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
   getTemplate() {
     // Флаг, что задача просрочена
     // (создан ли dueDate с пом-ю конструктора Date (мб придет объект другого типа, тогда = null и авто задача Expired)
-    const isExpired = this._dueDate instanceof Date && this._dueDate < Date.now();
+    const isExpired = this._dueDate instanceof Date && isOverdueDate(this._dueDate, new Date());
 
     const date = (this._isDateShowing && this._dueDate) ? formatDate(this._dueDate) : ``;
     const time = (this._isDateShowing && this._dueDate) ? formatTime(this._dueDate) : ``;

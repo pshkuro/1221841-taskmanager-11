@@ -1,4 +1,4 @@
-import {formatTime, formatDate} from "../utils/common";
+import {formatTime, formatDate, isOverdueDate} from "../utils/common";
 import AbstractComponent from "./abstract-component";
 
 export default class TaskCopmonent extends AbstractComponent {
@@ -16,7 +16,7 @@ export default class TaskCopmonent extends AbstractComponent {
 
 
   getTemplate() {
-    const isExpired = this._dueDate instanceof Date && this._dueDate < Date.now();
+    const isExpired = this._dueDate instanceof Date && isOverdueDate(this._dueDate, new Date());
     const isDateShowing = !!this._dueDate;
 
     const date = isDateShowing ? formatDate(this._dueDate) : ``;
