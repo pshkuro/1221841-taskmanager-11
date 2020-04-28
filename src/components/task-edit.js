@@ -19,6 +19,7 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
 
     this._description = task.description;
     this._color = task.color;
+    this._cardColor = this._color;
     this._dueDate = task.dueDate;
     this._repeatingDays = task.repeatingDays;
     this._isDateShowing = Boolean(this._dueDate); // Проверка, приходит ли такой объект, или нет (true/false)
@@ -35,6 +36,7 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
     this._subscribeOnDeadlineEvent();
     this._subscribeOnRepeatEvent();
     this._subscribeOnRepeatingDaysEvent();
+    this._subscribeOnColors();
   }
 
   // Обработчики добавляются заново при перерисовке
@@ -43,6 +45,7 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
     this._subscribeOnDeadlineEvent();
     this._subscribeOnRepeatEvent();
     this._subscribeOnRepeatingDaysEvent();
+    this._subscribeOnColors();
   }
 
   rerender() {
@@ -70,14 +73,14 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
     const classRepeat = this._isRepeatingTask ? `card--repeat` : ``;
     const classDeadline = isExpired ? `card--deadline` : ``; // Если задача просрочена, доб класс deadline, иначе ничего
 
-    const colorsMarkup = new ColorMarkupComponent(COLORS, this._color).getTemplate();
+    const colorsMarkup = new ColorMarkupComponent(COLORS, this._cardColor).getTemplate();
     const repeatingDaysMarkup = new RepeatingDaysMarkupComponent(DAYS, this._activeRepeatingDays).getTemplate();
 
     // кнопку «Save» необходимо блокировать, если поля показаны, а дата или дни повторения не выбраны
     const isBlockSaveButton = (date && isRepeating(this._activeRepeatingDays));
 
     return (
-      `<article class="card card--edit card--${this._color} ${classRepeat} ${classDeadline}">
+      `<article class="card card--edit card--${this._cardColor} ${classRepeat} ${classDeadline}">
         <form class="card__form" method="get">
           <div class="card__inner">
             <div class="card__color-bar">
@@ -177,6 +180,18 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
         this.rerender();
       });
     }
+  }
+
+  _subscribeOnColors() {
+    const colors = this._element.querySelector(`.card__colors-wrap`);
+    colors.addEventListener(`click`, (evt) => {
+      const colorInput = evt.target.closest(`.card__color-input`);
+      if (colorInput) {
+        this._cardColor = colorInput.value;
+        this.rerender();
+
+      }
+    });
   }
 
   _applyFlatpickr() {
