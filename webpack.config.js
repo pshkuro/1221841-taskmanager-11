@@ -1,3 +1,4 @@
+const MomentLocalesPlugin = require(`moment-locales-webpack-plugin`);
 const path = require(`path`);
 
 module.exports = {
@@ -13,6 +14,19 @@ module.exports = {
     // Автоматическая перезагрузка страницы
     // По умолчанию будет доступно по адресу 8080
     // Открываем в режиме инкогнито, чтобы не кешировать файлы сборки
-    watchContentBase: true
-  }
+    watchContentBase: true,
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/i,
+        use: [`style-loader`, `css-loader`],
+      },
+    ],
+  }, 
+  plugins: [
+    new MomentLocalesPlugin({
+      localesToKeep: [`en`]
+  })
+  ]
 };
