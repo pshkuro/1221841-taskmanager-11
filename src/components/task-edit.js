@@ -123,12 +123,10 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
     const colorsMarkup = new ColorMarkupComponent(COLORS, this._cardColor).getTemplate();
     const repeatingDaysMarkup = new RepeatingDaysMarkupComponent(DAYS, this._activeRepeatingDays).getTemplate();
 
-    this._currentDescription = encode(this._currentDescription);
+    const description = encode(this._currentDescription);
     // кнопку «Save» необходимо блокировать, если поля показаны, а дата или дни повторения не выбраны
-    const isBlockSaveButton = (this._isDateShowing && this._isRepeatingTask) ||
-    (this._isRepeatingTask && !isRepeating(this._activeRepeatingDays)) ||
-    !isAllowableDescriptionLength(this._currentDescription);
-
+    const isBlockSaveButton = (this._dueDate && isRepeating(this._activeRepeatingDays)
+    && isAllowableDescriptionLength(this._currentDescription));
 
     return (
       `<article class="card card--edit card--${this._cardColor} ${classRepeat} ${classDeadline}">
@@ -146,7 +144,7 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
                   class="card__text"
                   placeholder="Start typing your text here..."
                   name="text"
-                >${this._currentDescription}</textarea>
+                >${description}</textarea>
               </label>
             </div>
   
