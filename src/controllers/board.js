@@ -7,7 +7,7 @@ import LoadMoreButtonCopmonent from "../components/load-more-button";
 import TasksCopmonent from "../components/tasks";
 import NoTasks from "../components/no-tasks";
 import {renderPosition, render, remove} from "../utils/render";
-import TaskController from "../controllers/task";
+import TaskController, {Mode as TaskControllerMode, EmptyTask} from "../controllers/task";
 
 
 const SHOWING_TASKS_COUNT_ON_START = 8;
@@ -16,7 +16,7 @@ const SHOWING_TASKS_COUNT_BY_BUTTON = 8;
 const renderTasks = (taskListElement, tasks, onDataChange, onViewChange) => {
   return tasks.map((task) => {
     const taskController = new TaskController(taskListElement, onDataChange, onViewChange); // подписываем под-ков на сообщение
-    taskController.render(task);
+    taskController.render(task, TaskControllerMode.DEFAULT); // по умолчанию все карточки - default
 
     return taskController;
   });
@@ -58,6 +58,7 @@ export default class BoardController {
     this._loadMoreButtonComponent = new LoadMoreButtonCopmonent();
     this._showingTasksCount = SHOWING_TASKS_COUNT_ON_START;
     this._taskListElement = this._tasksComponent.getElement();
+    this._creatingTask = null;
 
     this._onDataChange = this._onDataChange.bind(this);
     this._onViewChange = this._onViewChange.bind(this);
@@ -88,6 +89,17 @@ export default class BoardController {
     this._renderLoadMoreButton();
   }
 
+  // Метод создания формы Создания карточки (не редактирования)
+  createTask() {
+    if (this._creatingTask) {
+      return;
+    }
+
+    const taskListElement = this._tasksComponent.getElement();
+    this._creatingTask = new TaskController(taskListElement, this._onDataChange, this._onViewChange);
+    this._creatingTask.render(EmptyTask, TaskControllerMode.ADDING);
+  }
+
   _renderTasks(tasks) {
     const taskListElement = this._tasksComponent.getElement();
 
@@ -112,7 +124,7 @@ export default class BoardController {
 
   // Логика кнопки LoadMoreButton
   _renderLoadMoreButton() {
-    remove(this._loadMoreButtonComponent); // удаляем, если < 5 на станице
+    remove(this._loadMoreButtonComponent); // удаляем, если < 8 на станице
     const tasks = this._tasksModel.getTasks();
     if (this._showingTasksCount >= tasks.length) {
       return;
@@ -147,12 +159,41 @@ export default class BoardController {
     }
   }
 
-  // То, что вызывает, находится в board, а то, что происходит в task
+  // Научит _onDataChange отличать случаи создания, редактирования и удаления данных
   _onDataChange(taskController, oldData, newData) {
-    const isSuccess = this._tasksModel.updateTask(oldData.id, newData); // Обновляем ее, если есть изменения
 
-    if (isSuccess) {
-      taskController.render(newData); // Отрисовываем
+    // Если данных до этого не было или они были пустые - добавление
+    if (oldData === EmptyTask) {
+      this._creatingTask = null;
+      if (newData === null) { // если форма создания каточки не заполнена удаляем
+        taskController.destroy();
+        this._updateTasks(this._showingTasksCount);
+      } else {
+        this._tasksModel.addTask(newData);
+        taskController.render(newData, TaskControllerMode.DEFAULT);
+
+        if (this._showingTasksCount % SHOWING_TASKS_COUNT_BY_BUTTON === 0) {
+          const destroyedTask = this._showedTaskControllers.pop(); // pop delete last el from Array
+          destroyedTask.destroy();
+        }
+
+        this._showedTaskControllers = [].concat(taskController, this._showedTaskControllers);
+        this._showingTasksCount = this._showedTaskControllers.length;
+
+        this._renderLoadMoreButton();
+      }
+
+      // Если данные null - удаление
+    } else if (newData === null) {
+      this._tasksModel.removeTask(oldData.id);
+      this._updateTasks(this._showingTasksCount);
+    } else {
+      const isSuccess = this._tasksModel.updateTask(oldData.id, newData);
+
+      // Обновление
+      if (isSuccess) {
+        taskController.render(newData, TaskControllerMode.DEFAULT); // ренедерим новые карточки
+      }
     }
   }
 

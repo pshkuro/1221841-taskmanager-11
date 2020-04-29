@@ -7,6 +7,36 @@ import flatpickr from "flatpickr";
 
 import "flatpickr/dist/flatpickr.min.css"; // Импорт как css файл
 
+const MIN_DESCRIPTION_LENGTH = 1;
+const MAX_DESCRIPTION_LENGTH = 140;
+
+const isAllowableDescriptionLength = (description) => {
+  const length = description.length;
+
+  return length >= MIN_DESCRIPTION_LENGTH &&
+    length <= MAX_DESCRIPTION_LENGTH;
+};
+
+
+// Получает данные формы
+const parseFormData = (formData) => {
+  const repeatingDays = DAYS.reduce((acc, day) => {
+    acc[day] = false;
+    return acc;
+  }, {});
+  const date = formData.get(`date`);
+
+  return {
+    description: formData.get(`text`),
+    color: formData.get(`color`),
+    dueDate: date ? new Date(date) : null,
+    repeatingDays: formData.getAll(`repeat`).reduce((acc, it) => {
+      acc[it] = true;
+      return acc;
+    }, repeatingDays),
+  };
+};
+
 export default class TaskEditCopmonent extends AbstractSmartComponent {
   constructor(task) {
     super();
@@ -27,10 +57,12 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
     this._applyFlatpickr();
 
     this._submitHandler = null;
+    this._deleteButtonClickHandler = null;
     this._subscribeOnDeadlineEvent();
     this._subscribeOnRepeatEvent();
     this._subscribeOnRepeatingDaysEvent();
     this._subscribeOnColors();
+    this._subscribeOnDescription();
   }
 
   // Обработчики добавляются заново при перерисовке
@@ -41,6 +73,7 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
     this._subscribeOnRepeatingDaysEvent();
     this._subscribeOnColors();
     this._applyFlatpickr();
+    this._subscribeOnDescription();
   }
 
   rerender() {
@@ -55,6 +88,24 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
     this._activeRepeatingDays = Object.assign({}, this._repeatingDays);
 
     this.rerender();
+  }
+
+  // Удаляет форму редактирования (кнопка Delete)
+  removeElement() {
+    if (this._flatpickr) {
+      this._flatpickr.destroy();
+      this._flatpickr = null;
+    }
+
+    super.removeElement();
+  }
+
+  // Получает данные из формы редактирования в виде объекта - передает модели
+  getData() {
+    const form = this.getElement().querySelector(`.card__form`);
+    const formData = new FormData(form);
+
+    return parseFormData(formData);
   }
 
   getTemplate() {
@@ -72,7 +123,9 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
     const repeatingDaysMarkup = new RepeatingDaysMarkupComponent(DAYS, this._activeRepeatingDays).getTemplate();
 
     // кнопку «Save» необходимо блокировать, если поля показаны, а дата или дни повторения не выбраны
-    const isBlockSaveButton = (this._date && isRepeating(this._activeRepeatingDays));
+    const isBlockSaveButton = (this._isDateShowing && this._isRepeatingTask) ||
+    (this._isRepeatingTask && !isRepeating(this._activeRepeatingDays)) ||
+    !isAllowableDescriptionLength(this._description);
 
     return (
       `<article class="card card--edit card--${this._cardColor} ${classRepeat} ${classDeadline}">
@@ -144,9 +197,18 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
     );
   }
 
+  // Обаботчик по форме Submit
   setSabmitHandler(handler) {
     this.getElement().querySelector(`form`).addEventListener(`submit`, handler);
     this._submitHandler = handler;
+  }
+
+  // Обработчик по кнопке Delete
+  setDeleteButtonClickHandler(handler) {
+    this.getElement().querySelector(`.card__delete`)
+      .addEventListener(`click`, handler);
+
+    this._deleteButtonClickHandler = handler;
   }
 
   _subscribeOnDeadlineEvent() {
@@ -185,6 +247,16 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
         this._cardColor = colorInput.value;
         this.rerender();
       }
+    });
+  }
+
+  _subscribeOnDescription() {
+    this._element.querySelector(`.card__text`)
+    .addEventListener(`input`, (evt) => {
+      this._description = evt.target.value;
+
+      const saveButton = this.getElement().querySelector(`.card__save`);
+      saveButton.disabled = !isAllowableDescriptionLength(this._description);
     });
   }
 
