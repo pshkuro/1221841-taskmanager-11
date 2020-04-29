@@ -42,6 +42,12 @@ export default class FiltersController {
     }
   }
 
+  rerender() {
+    this._activeFilterType = FilterType.ALL;
+    this.render();
+    this._tasksModel.setFilters(FilterType.ALL);
+  }
+
   _onFilterChange(filterType) {
     this._tasksModel.setFilters(filterType); // уведомляет всех кому интересно, что фильтр изменился
     this._activeFilterType = filterType; // текущий выбранный фильтр

@@ -93,8 +93,10 @@ export default class TaskController {
           remove(oldTaskComponent);
           remove(oldTaskEditComponent);
         }
+        this._onViewChange();
         document.addEventListener(`keydown`, this._onEscKeyDown);
         render(this._container, this._taskEditComponent, renderPosition.AFTERBEGIN);
+
         break;
     }
   }
@@ -112,7 +114,6 @@ export default class TaskController {
     remove(this._taskComponent);
     document.removeEventListener(`keydown`, this._onEscKeyDown);
   }
-
 
   _replaceTaskToEdit() { // Заменяем карточку на форму редактирование
     this._onViewChange(); // Реализуем сообщение, что все формы, открытые до этого, должны закрыться

@@ -25,7 +25,9 @@ filterController.render();
 const boardComponent = new BoardCopmonent();
 render(siteMainElement, boardComponent, renderPosition.BEFOREEND);
 
-const boardController = new BoardController(boardComponent, tasksModel);
+const boardController = new BoardController(boardComponent, tasksModel, () => {
+  filterController.rerender();
+});
 boardController.render();
 
 siteMenuComponent.setOnChange((menuItem) => {

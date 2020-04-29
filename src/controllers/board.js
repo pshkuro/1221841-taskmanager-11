@@ -46,7 +46,7 @@ const getSortedTasks = (tasks, sortType, from, to) => {
 
 // Логика отрисовки всего, что внутри Boad Container
 export default class BoardController {
-  constructor(container, tasksModel) {
+  constructor(container, tasksModel, onCreateTask) {
     this._container = container.getElement();
     this._tasksModel = tasksModel;
     // `подписчики`
@@ -66,7 +66,7 @@ export default class BoardController {
     this._sortComponent.setSortTypeChangeHandler(this._sortTasks);
     this._onFilterChange = this._onFilterChange.bind(this);
     this._tasksModel.setFilterChangeHandler(this._onFilterChange); // Устанавливает callback, который вызывается, когда Фильтр обновился
-
+    this.onCreateTask = onCreateTask;
   }
 
   render() {
@@ -95,6 +95,11 @@ export default class BoardController {
       return;
     }
 
+    this.onCreateTask();
+
+    this._showingTasksCount = SHOWING_TASKS_COUNT_ON_START;
+    this._removeTasks();
+    this.render();
     const taskListElement = this._tasksComponent.getElement();
     this._creatingTask = new TaskController(taskListElement, this._onDataChange, this._onViewChange);
     this._creatingTask.render(EmptyTask, TaskControllerMode.ADDING);

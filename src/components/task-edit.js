@@ -79,7 +79,6 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
 
   rerender() {
     super.rerender();
-
   }
 
   // Сброс измененных данных, если форма редактирования просто закрыта, а не сохранена
@@ -125,7 +124,7 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
 
     const description = encode(this._currentDescription);
     // кнопку «Save» необходимо блокировать, если поля показаны, а дата или дни повторения не выбраны
-    const isBlockSaveButton = (this._dueDate && isRepeating(this._activeRepeatingDays)
+    const isBlockSaveButton = (this._isDateShowing && isRepeating(this._activeRepeatingDays)
     && isAllowableDescriptionLength(this._currentDescription));
 
     return (
