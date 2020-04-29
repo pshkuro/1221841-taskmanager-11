@@ -4,6 +4,7 @@ import {formatTime, formatDate, isRepeating, isOverdueDate} from "../utils/commo
 import ColorMarkupComponent from "./task-color-markup";
 import RepeatingDaysMarkupComponent from "./task-repeatingDays-markup";
 import flatpickr from "flatpickr";
+import {encode} from "he";
 
 import "flatpickr/dist/flatpickr.min.css"; // Импорт как css файл
 
@@ -42,7 +43,7 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
     super();
     this._task = task;
 
-    this._description = task.description;
+    this._currentDescription = task.description;
     this._color = task.color;
     this._cardColor = this._color;
     this._dueDate = task.dueDate;
@@ -122,10 +123,12 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
     const colorsMarkup = new ColorMarkupComponent(COLORS, this._cardColor).getTemplate();
     const repeatingDaysMarkup = new RepeatingDaysMarkupComponent(DAYS, this._activeRepeatingDays).getTemplate();
 
+    this._currentDescription = encode(this._currentDescription);
     // кнопку «Save» необходимо блокировать, если поля показаны, а дата или дни повторения не выбраны
     const isBlockSaveButton = (this._isDateShowing && this._isRepeatingTask) ||
     (this._isRepeatingTask && !isRepeating(this._activeRepeatingDays)) ||
-    !isAllowableDescriptionLength(this._description);
+    !isAllowableDescriptionLength(this._currentDescription);
+
 
     return (
       `<article class="card card--edit card--${this._cardColor} ${classRepeat} ${classDeadline}">
@@ -143,7 +146,7 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
                   class="card__text"
                   placeholder="Start typing your text here..."
                   name="text"
-                >${this._description}</textarea>
+                >${this._currentDescription}</textarea>
               </label>
             </div>
   
@@ -253,10 +256,10 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
   _subscribeOnDescription() {
     this._element.querySelector(`.card__text`)
     .addEventListener(`input`, (evt) => {
-      this._description = evt.target.value;
+      this._currentDescription = evt.target.value;
 
       const saveButton = this.getElement().querySelector(`.card__save`);
-      saveButton.disabled = !isAllowableDescriptionLength(this._description);
+      saveButton.disabled = !isAllowableDescriptionLength(this._currentDescription);
     });
   }
 
