@@ -79,7 +79,7 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
 
   rerender() {
     super.rerender();
-    this._applyFlatpickr();
+
   }
 
   // Сброс измененных данных, если форма редактирования просто закрыта, а не сохранена
@@ -274,9 +274,12 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
       this._flatpickr = flatpickr(dateElement, {
         altInput: true,
         allowInput: true,
-        defaultDate: this._task.dueDate || `today`,
+        defaultDate: this._dueDate || `today`,
+        onClose: (selectedDates) => {
+          this._dueDate = selectedDates[0];
+          this.rerender();
+        }
       });
-
     }
   }
 }
