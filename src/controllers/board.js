@@ -112,6 +112,7 @@ export default class BoardController {
 
   // Логика кнопки LoadMoreButton
   _renderLoadMoreButton() {
+    remove(this._loadMoreButtonComponent); // удаляем, если < 5 на станице
     const tasks = this._tasksModel.getTasks();
     if (this._showingTasksCount >= tasks.length) {
       return;
