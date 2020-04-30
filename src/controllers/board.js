@@ -7,7 +7,7 @@ import LoadMoreButtonCopmonent from "../components/load-more-button";
 import TasksCopmonent from "../components/tasks";
 import NoTasks from "../components/no-tasks";
 import {renderPosition, render, remove} from "../utils/render";
-import TaskController from "../controllers/task";
+import TaskController, {Mode as TaskControllerMode, EmptyTask} from "../controllers/task";
 
 
 const SHOWING_TASKS_COUNT_ON_START = 8;
@@ -16,7 +16,7 @@ const SHOWING_TASKS_COUNT_BY_BUTTON = 8;
 const renderTasks = (taskListElement, tasks, onDataChange, onViewChange) => {
   return tasks.map((task) => {
     const taskController = new TaskController(taskListElement, onDataChange, onViewChange); // подписываем под-ков на сообщение
-    taskController.render(task);
+    taskController.render(task, TaskControllerMode.DEFAULT); // по умолчанию все карточки - default
 
     return taskController;
   });
@@ -46,9 +46,9 @@ const getSortedTasks = (tasks, sortType, from, to) => {
 
 // Логика отрисовки всего, что внутри Boad Container
 export default class BoardController {
-  constructor(container) {
+  constructor(container, tasksModel, onCreateTask) {
     this._container = container.getElement();
-    this._tasks = [];
+    this._tasksModel = tasksModel;
     // `подписчики`
     this._showedTaskControllers = []; // Все карточки задач, чтобы иметь доступ ко всем карточкам
 
@@ -58,17 +58,20 @@ export default class BoardController {
     this._loadMoreButtonComponent = new LoadMoreButtonCopmonent();
     this._showingTasksCount = SHOWING_TASKS_COUNT_ON_START;
     this._taskListElement = this._tasksComponent.getElement();
+    this._creatingTask = null;
 
     this._onDataChange = this._onDataChange.bind(this);
     this._onViewChange = this._onViewChange.bind(this);
     this._sortTasks = this._sortTasks.bind(this);
     this._sortComponent.setSortTypeChangeHandler(this._sortTasks);
-
+    this._onFilterChange = this._onFilterChange.bind(this);
+    this._tasksModel.setFilterChangeHandler(this._onFilterChange); // Устанавливает callback, который вызывается, когда Фильтр обновился
+    this.onCreateTask = onCreateTask;
   }
 
-  render(tasksData) {
-    this._tasks = tasksData;
-    const isAllTasksArchived = this._tasks.every((task) => task.isArchive); // Проверяем, все ли задачи в архиве
+  render() {
+    const tasks = this._tasksModel.getTasks();
+    const isAllTasksArchived = tasks.every((task) => task.isArchive); // Проверяем, все ли задачи в архиве
 
     if (isAllTasksArchived) {
       render(this._container, this._noTasksComponent, renderPosition.BEFOREEND);
@@ -80,18 +83,55 @@ export default class BoardController {
 
 
     // Отрисовываем наши карточки
-    const newTasks = renderTasks(this._taskListElement, this._tasks.slice(0, this._showingTasksCount),
-        this._onDataChange, this._onViewChange);
+    this._renderTasks(tasks.slice(0, this._showingTasksCount));
+
+
+    this._renderLoadMoreButton();
+  }
+
+  // Метод создания формы Создания карточки (не редактирования)
+  createTask() {
+    if (this._creatingTask) {
+      return;
+    }
+
+    this.onCreateTask();
+
+    this._showingTasksCount = SHOWING_TASKS_COUNT_ON_START;
+    this._removeTasks();
+    this.render();
+    const taskListElement = this._tasksComponent.getElement();
+    this._creatingTask = new TaskController(taskListElement, this._onDataChange, this._onViewChange);
+    this._creatingTask.render(EmptyTask, TaskControllerMode.ADDING);
+  }
+
+  _renderTasks(tasks) {
+    const taskListElement = this._tasksComponent.getElement();
+
+    const newTasks = renderTasks(taskListElement, tasks, this._onDataChange, this._onViewChange);
     this._showedTaskControllers = this._showedTaskControllers.concat(newTasks);
+    this._showingTasksCount = this._showedTaskControllers.length;
+  }
 
+  // Метод удаления карточек
+  _removeTasks() {
+    this._showedTaskControllers.forEach((taskController) => taskController.destroy());
+    this._showedTaskControllers = [];
+  }
 
-    this._renderLoadMoreButton(this._tasks);
+  // Метод обновления карточек
+  _updateTasks(count) {
+    this._removeTasks(); // удалим все
+    this._renderTasks(this._tasksModel.getTasks().slice(0, count)); // отрисовываем с новыми данными
+    this._renderLoadMoreButton(); // кнопку рендерим
   }
 
 
   // Логика кнопки LoadMoreButton
   _renderLoadMoreButton() {
-    if (this._showingTasksCount >= this._tasks.length) {
+    remove(this._loadMoreButtonComponent); // удаляем, если < 8 на станице
+    const tasks = this._tasksModel.getTasks();
+    if (this._showingTasksCount >= tasks.length) {
       return;
     }
     render(this._container, this._loadMoreButtonComponent, renderPosition.BEFOREEND); // Отрисовываем кнопу
@@ -100,12 +140,10 @@ export default class BoardController {
       const prevTasksCount = this._showingTasksCount;
       this._showingTasksCount = this._showingTasksCount + SHOWING_TASKS_COUNT_BY_BUTTON;
 
-      const sortedTasks = getSortedTasks(this._tasks, this._sortComponent.getSortType(), prevTasksCount, this._showingTasksCount);
-      const newTasks = renderTasks(this._taskListElement, sortedTasks, this._onDataChange, this._onViewChange);
+      const sortedTasks = getSortedTasks(tasks, this._sortComponent.getSortType(), prevTasksCount, this._showingTasksCount);
+      this._renderTasks(sortedTasks);
 
-      this._showedTaskControllers = this._showedTaskControllers.concat(newTasks);
-
-      if (this._showingTasksCount >= this._tasks.length) {
+      if (this._showingTasksCount >= tasks.length) {
         remove(this._loadMoreButtonComponent);
       }
     });
@@ -115,33 +153,53 @@ export default class BoardController {
   _sortTasks(sortType) {
     this._showingTasksCount = SHOWING_TASKS_COUNT_BY_BUTTON;
 
-    const sortedTasks = getSortedTasks(this._tasks, sortType, 0, this._showingTasksCount);
-    this._taskListElement.innerHTML = ``;
+    const sortedTasks = getSortedTasks(this._tasksModel.getTasks(), sortType, 0, this._showingTasksCount);
 
-    const newTasks = renderTasks(this._taskListElement, sortedTasks, this._onDataChange, this._onViewChange);
-    this._showedTaskControllers = newTasks;
+    this._removeTasks();
+    this._renderTasks(sortedTasks);
 
     const showMoreButton = this._container.querySelector(`.load-more`);
     if (!showMoreButton) {
-      this._renderLoadMoreButton(this._tasks);
+      this._renderLoadMoreButton();
     }
   }
 
-  // То, что вызывает, находится в board, а то, что происходит в task
+  // Научит _onDataChange отличать случаи создания, редактирования и удаления данных
   _onDataChange(taskController, oldData, newData) {
-    // Находит элемент, по которому произошел клик
-    const index = this._tasks.findIndex((it) => it === oldData);
 
-    if (index === -1) {
-      return;
+    // Если данных до этого не было или они были пустые - добавление
+    if (oldData === EmptyTask) {
+      this._creatingTask = null;
+      if (newData === null) { // если форма создания каточки не заполнена удаляем
+        taskController.destroy();
+        this._updateTasks(this._showingTasksCount);
+      } else {
+        this._tasksModel.addTask(newData);
+        taskController.render(newData, TaskControllerMode.DEFAULT);
+
+        if (this._showingTasksCount % SHOWING_TASKS_COUNT_BY_BUTTON === 0) {
+          const destroyedTask = this._showedTaskControllers.pop(); // pop delete last el from Array
+          destroyedTask.destroy();
+        }
+
+        this._showedTaskControllers = [].concat(taskController, this._showedTaskControllers);
+        this._showingTasksCount = this._showedTaskControllers.length;
+
+        this._renderLoadMoreButton();
+      }
+
+      // Если данные null - удаление
+    } else if (newData === null) {
+      this._tasksModel.removeTask(oldData.id);
+      this._updateTasks(this._showingTasksCount);
+    } else {
+      const isSuccess = this._tasksModel.updateTask(oldData.id, newData);
+
+      // Обновление
+      if (isSuccess) {
+        taskController.render(newData, TaskControllerMode.DEFAULT); // ренедерим новые карточки
+      }
     }
-
-    // Обрезаем до той задачи, которую нужно обновить, всталвяем обновленную, вставляем оставшуюся часть
-    // [до] + [old меняем на new] + [после]
-    this._tasks = [].concat(this._tasks.slice(0, index), newData, this._tasks.slice(index + 1));
-
-    // Рендерим new задачу
-    taskController.render(this._tasks[index]);
   }
 
   // `уведомляем подписчиков о сообщении`
@@ -149,5 +207,8 @@ export default class BoardController {
     this._showedTaskControllers.forEach((task) => task.setDefaultView());
   }
 
+  _onFilterChange() {
+    this._updateTasks(SHOWING_TASKS_COUNT_ON_START);
+  }
 
 }

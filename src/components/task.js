@@ -1,22 +1,24 @@
-import {formatTime, formatDate} from "../utils/common";
+import {formatTime, formatDate, isOverdueDate} from "../utils/common";
 import AbstractComponent from "./abstract-component";
+import {encode} from "he";
 
 export default class TaskCopmonent extends AbstractComponent {
 
   constructor(task) { // В Task передаются данные(объекты) карточек, сейчас моки, потом с сервера
     super();
 
-    this._description = task.description;
-    this._color = task.color;
-    this._dueDate = task.dueDate;
-    this._repeatingDays = task.repeatingDays;
+    const {description: notSanitizedDescription, dueDate, color, repeatingDays} = task;
+    this._description = encode(notSanitizedDescription);
+    this._color = color;
+    this._dueDate = dueDate;
+    this._repeatingDays = repeatingDays;
     this._isArchive = task.isArchive;
     this._isFavorite = task.isFavorite;
   }
 
 
   getTemplate() {
-    const isExpired = this._dueDate instanceof Date && this._dueDate < Date.now();
+    const isExpired = this._dueDate instanceof Date && isOverdueDate(this._dueDate, new Date());
     const isDateShowing = !!this._dueDate;
 
     const date = isDateShowing ? formatDate(this._dueDate) : ``;

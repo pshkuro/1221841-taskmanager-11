@@ -1,24 +1,51 @@
 import {DAYS, COLORS} from "../const";
 import AbstractSmartComponent from "./abstract-smart-component";
-import {formatTime, formatDate} from "../utils/common";
+import {formatTime, formatDate, isRepeating, isOverdueDate} from "../utils/common";
 import ColorMarkupComponent from "./task-color-markup";
 import RepeatingDaysMarkupComponent from "./task-repeatingDays-markup";
 import flatpickr from "flatpickr";
+import {encode} from "he";
 
 import "flatpickr/dist/flatpickr.min.css"; // Импорт как css файл
 
-const isRepeating = (repeatingDays) => {
-  return Object.values(repeatingDays).some((a) => a);
+const MIN_DESCRIPTION_LENGTH = 1;
+const MAX_DESCRIPTION_LENGTH = 140;
+
+const isAllowableDescriptionLength = (description) => {
+  const length = description.length;
+
+  return length >= MIN_DESCRIPTION_LENGTH &&
+    length <= MAX_DESCRIPTION_LENGTH;
 };
 
+
+// Получает данные формы
+const parseFormData = (formData) => {
+  const repeatingDays = DAYS.reduce((acc, day) => {
+    acc[day] = false;
+    return acc;
+  }, {});
+  const date = formData.get(`date`);
+
+  return {
+    description: formData.get(`text`),
+    color: formData.get(`color`),
+    dueDate: date ? new Date(date) : null,
+    repeatingDays: formData.getAll(`repeat`).reduce((acc, it) => {
+      acc[it] = true;
+      return acc;
+    }, repeatingDays),
+  };
+};
 
 export default class TaskEditCopmonent extends AbstractSmartComponent {
   constructor(task) {
     super();
     this._task = task;
 
-    this._description = task.description;
+    this._currentDescription = task.description;
     this._color = task.color;
+    this._cardColor = this._color;
     this._dueDate = task.dueDate;
     this._repeatingDays = task.repeatingDays;
     this._isDateShowing = Boolean(this._dueDate); // Проверка, приходит ли такой объект, или нет (true/false)
@@ -26,15 +53,17 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
     // хотя бы 1 эл true из repeatingDays
     this._isRepeatingTask = Object.values(this._repeatingDays).some((a) => a);
     this._activeRepeatingDays = Object.assign({}, this._repeatingDays);
-    this._flatpickr = null;
-    // this._applyFlatpickr(this);
-    this._applyFlatpickr();
     this._element = this.getElement();
+    this._flatpickr = null;
+    this._applyFlatpickr();
 
     this._submitHandler = null;
+    this._deleteButtonClickHandler = null;
     this._subscribeOnDeadlineEvent();
     this._subscribeOnRepeatEvent();
     this._subscribeOnRepeatingDaysEvent();
+    this._subscribeOnColors();
+    this._subscribeOnDescription();
   }
 
   // Обработчики добавляются заново при перерисовке
@@ -43,11 +72,13 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
     this._subscribeOnDeadlineEvent();
     this._subscribeOnRepeatEvent();
     this._subscribeOnRepeatingDaysEvent();
+    this._subscribeOnColors();
+    this._applyFlatpickr();
+    this._subscribeOnDescription();
   }
 
   rerender() {
     super.rerender();
-    this._applyFlatpickr();
   }
 
   // Сброс измененных данных, если форма редактирования просто закрыта, а не сохранена
@@ -59,10 +90,28 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
     this.rerender();
   }
 
+  // Удаляет форму редактирования (кнопка Delete)
+  removeElement() {
+    if (this._flatpickr) {
+      this._flatpickr.destroy();
+      this._flatpickr = null;
+    }
+
+    super.removeElement();
+  }
+
+  // Получает данные из формы редактирования в виде объекта - передает модели
+  getData() {
+    const form = this.getElement().querySelector(`.card__form`);
+    const formData = new FormData(form);
+
+    return parseFormData(formData);
+  }
+
   getTemplate() {
     // Флаг, что задача просрочена
     // (создан ли dueDate с пом-ю конструктора Date (мб придет объект другого типа, тогда = null и авто задача Expired)
-    const isExpired = this._dueDate instanceof Date && this._dueDate < Date.now();
+    const isExpired = this._dueDate instanceof Date && isOverdueDate(this._dueDate, new Date());
 
     const date = (this._isDateShowing && this._dueDate) ? formatDate(this._dueDate) : ``;
     const time = (this._isDateShowing && this._dueDate) ? formatTime(this._dueDate) : ``;
@@ -70,14 +119,16 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
     const classRepeat = this._isRepeatingTask ? `card--repeat` : ``;
     const classDeadline = isExpired ? `card--deadline` : ``; // Если задача просрочена, доб класс deadline, иначе ничего
 
-    const colorsMarkup = new ColorMarkupComponent(COLORS, this._color).getTemplate();
+    const colorsMarkup = new ColorMarkupComponent(COLORS, this._cardColor).getTemplate();
     const repeatingDaysMarkup = new RepeatingDaysMarkupComponent(DAYS, this._activeRepeatingDays).getTemplate();
 
+    const description = encode(this._currentDescription);
     // кнопку «Save» необходимо блокировать, если поля показаны, а дата или дни повторения не выбраны
-    const isBlockSaveButton = (date && isRepeating(this._activeRepeatingDays));
+    const isBlockSaveButton = (this._isDateShowing && isRepeating(this._activeRepeatingDays)
+    && isAllowableDescriptionLength(this._currentDescription));
 
     return (
-      `<article class="card card--edit card--${this._color} ${classRepeat} ${classDeadline}">
+      `<article class="card card--edit card--${this._cardColor} ${classRepeat} ${classDeadline}">
         <form class="card__form" method="get">
           <div class="card__inner">
             <div class="card__color-bar">
@@ -92,7 +143,7 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
                   class="card__text"
                   placeholder="Start typing your text here..."
                   name="text"
-                >${this._description}</textarea>
+                >${description}</textarea>
               </label>
             </div>
   
@@ -146,9 +197,18 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
     );
   }
 
+  // Обаботчик по форме Submit
   setSabmitHandler(handler) {
     this.getElement().querySelector(`form`).addEventListener(`submit`, handler);
     this._submitHandler = handler;
+  }
+
+  // Обработчик по кнопке Delete
+  setDeleteButtonClickHandler(handler) {
+    this.getElement().querySelector(`.card__delete`)
+      .addEventListener(`click`, handler);
+
+    this._deleteButtonClickHandler = handler;
   }
 
   _subscribeOnDeadlineEvent() {
@@ -179,6 +239,27 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
     }
   }
 
+  _subscribeOnColors() {
+    const colors = this._element.querySelector(`.card__colors-wrap`);
+    colors.addEventListener(`click`, (evt) => {
+      const colorInput = evt.target.closest(`.card__color-input`);
+      if (colorInput) {
+        this._cardColor = colorInput.value;
+        this.rerender();
+      }
+    });
+  }
+
+  _subscribeOnDescription() {
+    this._element.querySelector(`.card__text`)
+    .addEventListener(`input`, (evt) => {
+      this._currentDescription = evt.target.value;
+
+      const saveButton = this.getElement().querySelector(`.card__save`);
+      saveButton.disabled = !isAllowableDescriptionLength(this._currentDescription);
+    });
+  }
+
   _applyFlatpickr() {
     if (this._flatpickr) {
       // При своем создании `flatpickr` дополнительно создает вспомогательные DOM-элементы.
@@ -192,11 +273,11 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
       this._flatpickr = flatpickr(dateElement, {
         altInput: true,
         allowInput: true,
-        defaultDate: this._task.dueDate || `today`,
-        // onClose(dataStr) {
-        //   editor._dueDate = new Date(Date.parse(dataStr));
-        //   editor.rerender();
-        // }
+        defaultDate: this._dueDate || `today`,
+        onClose: (selectedDates) => {
+          this._dueDate = selectedDates[0];
+          this.rerender();
+        }
       });
     }
   }
