@@ -47,7 +47,8 @@ const getSortedTasks = (tasks, sortType, from, to) => {
 // Логика отрисовки всего, что внутри Boad Container
 export default class BoardController {
   constructor(container, tasksModel, onCreateTask) {
-    this._container = container.getElement();
+    this._container = container;
+    this._containerElement = container.getElement();
     this._tasksModel = tasksModel;
     // `подписчики`
     this._showedTaskControllers = []; // Все карточки задач, чтобы иметь доступ ко всем карточкам
@@ -69,17 +70,25 @@ export default class BoardController {
     this.onCreateTask = onCreateTask;
   }
 
+  hide() {
+    this._container.hide();
+  }
+
+  show() {
+    this._container.show();
+  }
+
   render() {
     const tasks = this._tasksModel.getTasks();
     const isAllTasksArchived = tasks.every((task) => task.isArchive); // Проверяем, все ли задачи в архиве
 
     if (isAllTasksArchived) {
-      render(this._container, this._noTasksComponent, renderPosition.BEFOREEND);
+      render(this._containerElement, this._noTasksComponent, renderPosition.BEFOREEND);
       return;
     }
 
-    render(this._container, this._sortComponent, renderPosition.BEFOREEND);
-    render(this._container, this._tasksComponent, renderPosition.BEFOREEND);
+    render(this._containerElement, this._sortComponent, renderPosition.BEFOREEND);
+    render(this._containerElement, this._tasksComponent, renderPosition.BEFOREEND);
 
 
     // Отрисовываем наши карточки
@@ -134,7 +143,7 @@ export default class BoardController {
     if (this._showingTasksCount >= tasks.length) {
       return;
     }
-    render(this._container, this._loadMoreButtonComponent, renderPosition.BEFOREEND); // Отрисовываем кнопу
+    render(this._containerElement, this._loadMoreButtonComponent, renderPosition.BEFOREEND); // Отрисовываем кнопу
 
     this._loadMoreButtonComponent.setClickHandler(() => { // По щелочу подгружаем еще карточки
       const prevTasksCount = this._showingTasksCount;
@@ -158,7 +167,7 @@ export default class BoardController {
     this._removeTasks();
     this._renderTasks(sortedTasks);
 
-    const showMoreButton = this._container.querySelector(`.load-more`);
+    const showMoreButton = this._containerElement.querySelector(`.load-more`);
     if (!showMoreButton) {
       this._renderLoadMoreButton();
     }
