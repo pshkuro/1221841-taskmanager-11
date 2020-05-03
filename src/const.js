@@ -11,8 +11,10 @@ export const FilterType = {
   TODAY: `today`,
 };
 
+// Удалить??
 export const DAYS = [`mo`, `tu`, `we`, `th`, `fr`, `sa`, `su`];
 
+// Удалить?
 export const COLOR = {
   BLACK: `black`,
   YELLOW: `yellow`,
@@ -23,6 +25,7 @@ export const COLOR = {
 
 export const COLORS = Object.values(COLOR);
 
+// Удалить?
 export const DESCRIPTION_ITEMS = [
   `Изучить теорию`,
   `Сделать домашку`,

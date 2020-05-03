@@ -8,7 +8,7 @@ export const formatDate = (date) => {
   return moment(date).format(`DD MMMM`);
 };
 
-// Генерация случ эл массива
+// Генерация случ эл массива ---УДАЛИТЬ??
 export const getRandomArrayItem = (array) => {
   const randomIndex = getRandomIntegerNumber(0, array.length);
 
@@ -20,7 +20,7 @@ export const getRandomIntegerNumber = (min, max) => {
   return min + Math.floor(Math.random() * (max - min));
 };
 
-// Генерация случайной даты (+/- 7 дней с DateNow)
+// Генерация случайной даты (+/- 7 дней с DateNow) --- УДАЛИТЬ??
 export const getRandomDate = () => {
   const targetDate = new Date();
   const sign = Math.random() > 0.5 ? 1 : -1;
