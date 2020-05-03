@@ -21,7 +21,6 @@ export default class FiltersController {
   render() {
     const container = this._container;
     const allTasks = this._tasksModel.getAllTasks();
-
     const filters = Object.values(FilterType).map((filterType) => {
       return {
         name: filterType,

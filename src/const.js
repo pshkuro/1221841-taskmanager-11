@@ -11,7 +11,6 @@ export const FilterType = {
   TODAY: `today`,
 };
 
-// Удалить??
 export const DAYS = [`mo`, `tu`, `we`, `th`, `fr`, `sa`, `su`];
 
 // Удалить?

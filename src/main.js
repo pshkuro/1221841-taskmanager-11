@@ -8,6 +8,7 @@ import {renderPosition, render} from "./utils/render";
 import TasksModel from "./models/tasks";
 
 const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZAo=`;
+const END_POINT = `https://11.ecmascript.pages.academy/task-manager`;
 
 const dateTo = new Date();
 const dateFrom = (() => {
@@ -16,7 +17,8 @@ const dateFrom = (() => {
   return d;
 })();
 
-const api = new API(AUTHORIZATION);
+
+const api = new API(END_POINT, AUTHORIZATION);
 const tasksModel = new TasksModel();
 
 const siteMainElement = document.querySelector(`.main`);
@@ -24,15 +26,15 @@ const siteHeaderElement = siteMainElement.querySelector(`.main__control`);
 const siteMenuComponent = new SiteMenuCopmonent();
 const filterController = new FiltersController(siteMainElement, tasksModel);
 const boardComponent = new BoardCopmonent();
+const boardController = new BoardController(boardComponent, tasksModel, api, () => {
+  filterController.rerender();
+});
 const statisticsComponent = new StatisticsComponent({tasks: tasksModel, dateFrom, dateTo});
 
 
 render(siteHeaderElement, siteMenuComponent, renderPosition.BEFOREEND);
 filterController.render();
 render(siteMainElement, boardComponent, renderPosition.BEFOREEND);
-const boardController = new BoardController(boardComponent, tasksModel, () => {
-  filterController.rerender();
-});
 render(siteMainElement, statisticsComponent, renderPosition.BEFOREEND);
 statisticsComponent.hide();
 
@@ -59,5 +61,6 @@ siteMenuComponent.setOnChange((menuItem) => {
 api.getTasks()
   .then((tasks) => { // Загружаем контейнер тасков не сразу, а после того, как они придут с сервера
     tasksModel.setTasks(tasks);
+    filterController.rerender();
     boardController.render();
   });

@@ -1,5 +1,5 @@
 // Приводим структуру данных с сервера к структуре, с которой сможет работать наше приложение
-export default class Task {
+export default class TaskModel {
   constructor(data) {
     this.id = data[`id`];
     this.description = data[`description`] || ``;
@@ -10,11 +10,29 @@ export default class Task {
     this.isArchive = Boolean(data[`is_archived`]);
   }
 
+  // Формат данных сервера
+  toRAW() {
+    return {
+      "id": this.id,
+      "description": this.description,
+      "due_date": this.dueDate ? this.dueDate.toISOString() : null,
+      "repeating_days": this.repeatingDays,
+      "color": this.color,
+      "is_favorite": this.isFavorite,
+      "is_archived": this.isArchive,
+    };
+  }
+
+
   static parseTask(data) {
-    return new Task(data);
+    return new TaskModel(data);
   }
 
   static parseTasks(data) {
-    return data.map(Task.parseTask);
+    return data.map(TaskModel.parseTask);
+  }
+
+  static clone(data) {
+    return new TaskModel(data.toRAW());
   }
 }
