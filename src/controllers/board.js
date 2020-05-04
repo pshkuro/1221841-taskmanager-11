@@ -78,24 +78,7 @@ export default class BoardController {
     this._container.show();
   }
 
-  _renderSortingBar() {
-    this._sortComponent.setSortTypeChangeHandler(this._sortTasks);
-    render(this._containerElement, this._sortComponent, renderPosition.AFTERBEGIN);
-  }
-
-  _renderTasksContainer() {
-    render(this._containerElement, this._tasksComponent, renderPosition.BEFOREEND);
-  }
-
-  _renderTaskList() {
-    this._updateTasks(SHOWING_TASKS_COUNT_ON_START);
-  }
-
-  _renderNoTasks() {
-    render(this._containerElement, this._noTasksComponent, renderPosition.AFTERBEGIN);
-  }
-
-  renderBoard() {
+  render() {
     const tasks = this._tasksModel.getTasks();
     const hasTasks = tasks.length > 0;
 
@@ -112,27 +95,6 @@ export default class BoardController {
 
     this._renderSortingBar();
     this._renderTaskList();
-  }
-
-  render() {
-    this.renderBoard();
-    // const tasks = this._tasksModel.getTasks();
-    // const isAllTasksArchived = tasks.every((task) => task.isArchive); // Проверяем, все ли задачи в архиве
-
-    // if (isAllTasksArchived) {
-    //   render(this._containerElement, this._noTasksComponent, renderPosition.BEFOREEND);
-    //   return;
-    // }
-
-    // render(this._containerElement, this._sortComponent, renderPosition.BEFOREEND);
-    // render(this._containerElement, this._tasksComponent, renderPosition.BEFOREEND);
-
-
-    // // Отрисовываем наши карточки
-    // this._renderTasks(tasks.slice(0, this._showingTasksCount));
-
-
-    // this._renderLoadMoreButton();
   }
 
   // Метод создания формы Создания карточки (не редактирования)
@@ -170,6 +132,23 @@ export default class BoardController {
     this._removeTasks(); // удалим все
     this._renderTasks(this._tasksModel.getTasks().slice(0, count)); // отрисовываем с новыми данными
     this._renderLoadMoreButton(); // кнопку рендерим
+  }
+
+  _renderSortingBar() {
+    this._sortComponent.setSortTypeChangeHandler(this._sortTasks);
+    render(this._containerElement, this._sortComponent, renderPosition.AFTERBEGIN);
+  }
+
+  _renderTasksContainer() {
+    render(this._containerElement, this._tasksComponent, renderPosition.BEFOREEND);
+  }
+
+  _renderTaskList() {
+    this._updateTasks(SHOWING_TASKS_COUNT_ON_START);
+  }
+
+  _renderNoTasks() {
+    render(this._containerElement, this._noTasksComponent, renderPosition.AFTERBEGIN);
   }
 
 
@@ -236,7 +215,6 @@ export default class BoardController {
 
             this._renderLoadMoreButton();
           })
-
           .catch(() => {
             taskController.shake();
           });
@@ -274,8 +252,7 @@ export default class BoardController {
   }
 
   _onFilterChange() {
-    this.renderBoard();
-    // this._updateTasks(SHOWING_TASKS_COUNT_ON_START);
+    this.render();
   }
 
 }
