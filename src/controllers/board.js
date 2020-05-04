@@ -46,10 +46,11 @@ const getSortedTasks = (tasks, sortType, from, to) => {
 
 // Логика отрисовки всего, что внутри Boad Container
 export default class BoardController {
-  constructor(container, tasksModel, onCreateTask) {
+  constructor(container, tasksModel, api, onCreateTask) {
     this._container = container;
     this._containerElement = container.getElement();
     this._tasksModel = tasksModel;
+    this._api = api;
     // `подписчики`
     this._showedTaskControllers = []; // Все карточки задач, чтобы иметь доступ ко всем карточкам
 
@@ -202,12 +203,15 @@ export default class BoardController {
       this._tasksModel.removeTask(oldData.id);
       this._updateTasks(this._showingTasksCount);
     } else {
-      const isSuccess = this._tasksModel.updateTask(oldData.id, newData);
+      this._api.updateTask(oldData.id, newData)
+        .then((taskModel) => {
+          const isSuccess = this._tasksModel.updateTask(oldData.id, taskModel);
 
-      // Обновление
-      if (isSuccess) {
-        taskController.render(newData, TaskControllerMode.DEFAULT); // ренедерим новые карточки
-      }
+          if (isSuccess) {
+            taskController.render(taskModel, TaskControllerMode.DEFAULT);
+            this._updateTasks(this._showingTasksCount);
+          }
+        });
     }
   }
 
