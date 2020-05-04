@@ -4,7 +4,8 @@ import BoardCopmonent from "./components/boards";
 import BoardController from "./controllers/board";
 import FiltersController from "./controllers/filters";
 import StatisticsComponent from "./components/statistics";
-import {renderPosition, render} from "./utils/render";
+import LoadingComponent from "./components/loading";
+import {renderPosition, render, remove} from "./utils/render";
 import TasksModel from "./models/tasks";
 
 const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZAo=`;
@@ -25,6 +26,7 @@ const siteMainElement = document.querySelector(`.main`);
 const siteHeaderElement = siteMainElement.querySelector(`.main__control`);
 const siteMenuComponent = new SiteMenuCopmonent();
 const filterController = new FiltersController(siteMainElement, tasksModel);
+const loadingComponent = new LoadingComponent();
 const boardComponent = new BoardCopmonent();
 const boardController = new BoardController(boardComponent, tasksModel, api, () => {
   filterController.rerender();
@@ -34,6 +36,7 @@ const statisticsComponent = new StatisticsComponent({tasks: tasksModel, dateFrom
 
 render(siteHeaderElement, siteMenuComponent, renderPosition.BEFOREEND);
 filterController.render();
+render(siteMainElement, loadingComponent, renderPosition.BEFOREEND);
 render(siteMainElement, boardComponent, renderPosition.BEFOREEND);
 render(siteMainElement, statisticsComponent, renderPosition.BEFOREEND);
 statisticsComponent.hide();
@@ -60,7 +63,7 @@ siteMenuComponent.setOnChange((menuItem) => {
 
 api.getTasks()
   .then((tasks) => { // Загружаем контейнер тасков не сразу, а после того, как они придут с сервера
+    remove(loadingComponent);
     tasksModel.setTasks(tasks);
-    filterController.rerender();
     boardController.render();
   });

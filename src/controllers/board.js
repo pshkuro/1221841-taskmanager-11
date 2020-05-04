@@ -65,7 +65,6 @@ export default class BoardController {
     this._onDataChange = this._onDataChange.bind(this);
     this._onViewChange = this._onViewChange.bind(this);
     this._sortTasks = this._sortTasks.bind(this);
-    this._sortComponent.setSortTypeChangeHandler(this._sortTasks);
     this._onFilterChange = this._onFilterChange.bind(this);
     this._tasksModel.setFilterChangeHandler(this._onFilterChange); // Устанавливает callback, который вызывается, когда Фильтр обновился
     this.onCreateTask = onCreateTask;
@@ -79,24 +78,61 @@ export default class BoardController {
     this._container.show();
   }
 
-  render() {
-    const tasks = this._tasksModel.getTasks();
-    const isAllTasksArchived = tasks.every((task) => task.isArchive); // Проверяем, все ли задачи в архиве
+  _renderSortingBar() {
+    this._sortComponent.setSortTypeChangeHandler(this._sortTasks);
+    render(this._containerElement, this._sortComponent, renderPosition.AFTERBEGIN);
+  }
 
-    if (isAllTasksArchived) {
-      render(this._containerElement, this._noTasksComponent, renderPosition.BEFOREEND);
+  _renderTasksContainer() {
+    render(this._containerElement, this._tasksComponent, renderPosition.BEFOREEND);
+  }
+
+  _renderTaskList() {
+    this._updateTasks(SHOWING_TASKS_COUNT_ON_START);
+  }
+
+  _renderNoTasks() {
+    render(this._containerElement, this._noTasksComponent, renderPosition.AFTERBEGIN);
+  }
+
+  renderBoard() {
+    const tasks = this._tasksModel.getTasks();
+    const hasTasks = tasks.length > 0;
+
+    remove(this._sortComponent);
+    remove(this._tasksComponent);
+    remove(this._noTasksComponent);
+
+    this._renderTasksContainer();
+
+    if (!hasTasks) {
+      this._renderNoTasks();
       return;
     }
 
-    render(this._containerElement, this._sortComponent, renderPosition.BEFOREEND);
-    render(this._containerElement, this._tasksComponent, renderPosition.BEFOREEND);
+    this._renderSortingBar();
+    this._renderTaskList();
+  }
+
+  render() {
+    this.renderBoard();
+    // const tasks = this._tasksModel.getTasks();
+    // const isAllTasksArchived = tasks.every((task) => task.isArchive); // Проверяем, все ли задачи в архиве
+
+    // if (isAllTasksArchived) {
+    //   render(this._containerElement, this._noTasksComponent, renderPosition.BEFOREEND);
+    //   return;
+    // }
+
+    // render(this._containerElement, this._sortComponent, renderPosition.BEFOREEND);
+    // render(this._containerElement, this._tasksComponent, renderPosition.BEFOREEND);
 
 
-    // Отрисовываем наши карточки
-    this._renderTasks(tasks.slice(0, this._showingTasksCount));
+    // // Отрисовываем наши карточки
+    // this._renderTasks(tasks.slice(0, this._showingTasksCount));
 
 
-    this._renderLoadMoreButton();
+    // this._renderLoadMoreButton();
   }
 
   // Метод создания формы Создания карточки (не редактирования)
@@ -238,7 +274,8 @@ export default class BoardController {
   }
 
   _onFilterChange() {
-    this._updateTasks(SHOWING_TASKS_COUNT_ON_START);
+    this.renderBoard();
+    // this._updateTasks(SHOWING_TASKS_COUNT_ON_START);
   }
 
 }
