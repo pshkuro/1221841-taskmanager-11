@@ -11,6 +11,11 @@ import "flatpickr/dist/flatpickr.min.css"; // Импорт как css файл
 const MIN_DESCRIPTION_LENGTH = 1;
 const MAX_DESCRIPTION_LENGTH = 140;
 
+const DefaultData = {
+  deleteButtonText: `Delete`,
+  saveButtonText: `Save`,
+};
+
 const isAllowableDescriptionLength = (description) => {
   const length = description.length;
 
@@ -23,6 +28,7 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
     super();
     this._task = task;
 
+    this._externalData = DefaultData;
     this._currentDescription = task.description;
     this._color = task.color;
     this._cardColor = this._color;
@@ -100,6 +106,9 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
     const colorsMarkup = new ColorMarkupComponent(COLORS, this._cardColor).getTemplate();
     const repeatingDaysMarkup = new RepeatingDaysMarkupComponent(DAYS, this._activeRepeatingDays).getTemplate();
 
+    const deleteButtonText = this._externalData.deleteButtonText;
+    const saveButtonText = this._externalData.saveButtonText;
+
     const description = encode(this._currentDescription);
     // кнопку «Save» необходимо блокировать, если поля показаны, а дата или дни повторения не выбраны
     const isBlockSaveButton = (this._isDateShowing && isRepeating(this._activeRepeatingDays)
@@ -166,13 +175,18 @@ export default class TaskEditCopmonent extends AbstractSmartComponent {
             </div>
   
             <div class="card__status-btns">
-              <button class="card__save" type="submit"${isBlockSaveButton ? `` : `disabled`}>save</button>
-              <button class="card__delete" type="button">delete</button>
+              <button class="card__save" type="submit"${isBlockSaveButton ? `` : `disabled`}>${saveButtonText}</button>
+              <button class="card__delete" type="button">${deleteButtonText}</button>
             </div>
           </div>
         </form>
       </article>`
     );
+  }
+
+  setData(data) {
+    this._externalData = Object.assign({}, DefaultData, data);
+    this.rerender();
   }
 
   // Обаботчик по форме Submit
